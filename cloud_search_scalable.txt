@@ -1,0 +1,1 @@
+Compare AWS Cloud Search, Katta and ElasticSearch 
