@@ -1,1 +1,78 @@
 Compare AWS Cloud Search, Katta and ElasticSearch 
+
+Dynamic mapping in ES
+River concept e.g. CouchDb - change notifications subscribe
+
+Plugins
+
+http://www.elasticsearch.org/tutorials/2011/09/14/creating-pluggable-rest-endpoints.html
+
+Lucene Basics
+
+distributed and near realtime
+
+--
+It has a FS abstraction and it is used to reads and write index  files
+IndexWriter is used to add and delete documents from a index
+Stored in memory and requires a commit to make them persistent (expensive) - flushes and fyncs a lot of files
+A single IW writes to a index - expensive to create - Share IndexWriter 
+
+--
+Index has segments 
+Each segment is in itself a self sufficient index and immutable to delete - thus great candidates for caching
+
+segments are added by commits and internal fluhing
+lot of caching per segment (terms, fields)
+segments are continuously being merged
+
+--
+Near realtime concept - Lucene
+
+IndexReader - used in search
+IW#getReader gets a refereshed IR that sees changes done to IW - flushed changes not commited ones - expensive dont call it immediately every sec is ok
+Segment based Readers and Search - search is executed segment at a time
+
+--
+How do we distributed search 
+
+implement directory on distributed system like infinispan - store file chunks read on demand
+
+Single IW, IR Directory on several nodes and each node hosts file chunks
+
+Problem single IR & IW do not scale for big indices and writes
+chatty many network calls
+
+cant scale reading or writing
+--
+Sharding or Partitioning
+
+Term Partitioning - each node has a subset of terms but for those terms the inverted index lists all the postings or documents 
+Lucandra/Solandra Riak search - very chatty - FieldCache does not work as IR is always changing
+
+pros k term search only go to max k shards & O(k ) disk seeks
+
+con - high network traffic, data for each matching term has to be collected in one place, harder to have per doc info e.g facets, sorting, custom scoring
+
+Document Partitioning - Each node has a subset of documents and a fully functional index
+
+all cons above are pros - each shard can process query independently, less network traffic, easy to keep per doc info 
+cons - go to each shards, o(k *n) disk seeks  - n shards
+
+merging on one node 
+
+
+-----
+
+Chosen Document Partitioning
+
+Several shards - each is a complete Lucene index
+
+Index a document to the Lucene shard it maps to and then do a distributed search across all Lucene shards
+
+Replicate Lucene Shards, HA and scale search by searching replicas
+
+--- 
+
+Replication
+
+Slave - Pull replication - pull index files from master only delta - only added segments

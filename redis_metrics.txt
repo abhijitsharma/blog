@@ -1,1 +1,15 @@
 Using Redis for performance metrics
+
+Links
+
+http://blog.getspool.com/2011/11/29/fast-easy-realtime-metrics-using-redis-bitmaps/
+https://gist.github.com/1384211
+http://knokio.com/data/analytics-with-redis
+http://bretthoerner.com/2011/2/21/redis-at-disqus/
+http://simonwillison.net/static/2010/redis-tutorial/
+http://www.lukemelia.com/blog/archives/2010/01/17/redis-in-practice-whos-online/
+https://gist.github.com/876762
+http://chris6f.com/rate-limiting-with-redis
+http://static.springsource.org/spring-data/data-redis/docs/1.0.0.RELEASE/reference/redis.html
+http://openmymind.net/redis.pdf
+
