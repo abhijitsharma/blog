@@ -1,3 +1,5 @@
 Integrating more data sources in AWS CloudSearch
 
 ES has River concept to integrate with external systems and index them and make data searchable - e.g. a River for CouchDb. Something similar for AWS Cloud Search would be interesting - e.g. Dynamo, RDS, files on EBS, S3 (this is supported already)
+
+AWS crawler for Cloud Search 

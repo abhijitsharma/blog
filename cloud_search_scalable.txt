@@ -1,5 +1,9 @@
 Compare AWS Cloud Search, Katta and ElasticSearch 
 
+Works on ec2
+
+ES has River concept to integrate with external systems and index them and make data searchable - e.g. a River for CouchDb. Something similar for AWS Cloud Search would be interesting - e.g. Dynamo, RDS, files on EBS, S3 (this is supported already)
+
 Dynamic mapping in ES
 River concept e.g. CouchDb - change notifications subscribe
 
@@ -11,6 +15,7 @@ Lucene Basics
 
 distributed and near realtime
 
+http://www.elasticsearch.org/videos/2011/08/09/road-to-a-distributed-searchengine-berlinbuzzwords.html
 --
 It has a FS abstraction and it is used to reads and write index  files
 IndexWriter is used to add and delete documents from a index
@@ -76,3 +81,172 @@ Replicate Lucene Shards, HA and scale search by searching replicas
 Replication
 
 Slave - Pull replication - pull index files from master only delta - only added segments
+	- not realtime
+	- requires commit on master to pull on slave - commit is expensive & heavy operation
+	- redundant data transfers as segments merged
+	- slaves replication delay get too behind for realtime search - large segment dont want to coomit all the time - lose HA
+	
+	lets say 1 sec is ok
+	
+	Push replication -master pushes doc to all replicas and all replicas index the document
+	
+	issue do carefully when concurrent indexing operations when doc updates are heavy - use versions etc
+	
+	advantages
+		- docs are indexed and available immediately on all replicas - HA and enables near realtime search
+		- arch allows shifting of roles - primary dies some other replica becomes primary
+	
+	sync will wait for all docs to be indexed on all replicas
+	
+	IW#commit persists index - needed although it is heavy - solved by having a write ahead log which can be replayed when crashes occur
+	
+	ElasticSearch
+	
+	 - index has Shard and replicas assigned to nodes - one primary shard and other replicas - allocation is done automatically by the cluster
+		Indexing only happens on primary
+	 - automatic shrding , push replication
+	 - takes a document based on id
+	 
+	 Indexing 
+	 doc 1 goes to node 1 shard 0 primary
+	 doc 2 goes to node 2 shard 0 primary
+	 automatic node redirection
+	 
+	 
+	 search 
+	 Scatter gather - hit 1 of the nodes it knows where the shards are 
+	 
+	 auto load balancing between replicas - round robin through replicas if hit another search 
+	 
+	 automatic failover if a node fails replica becomes primary - Indexing only happens on primary - hot recovery
+	 
+	 Add a node - hot relocation of shards to the new node to rebalance the number of shards 
+	 
+	 dynamic add replicas
+	 
+	 
+	 multi-tenancy indices
+	 
+	 create multiple indices and search on one, two or across all
+	 
+	 example create an index per week of logs and then create a alias for a bunch of them - for logs
+	 deleting is easier 20 weeks logs easily delete 21st week - just del a index file
+	 
+	 ---
+	 Txn Log
+	 
+	 Indexed / Deleted documents are fully persisted - no need for IW#commit
+	 Managed using WAL Txn Log 
+	 Utilized during hot relocation of shards
+	 Periodically flushed using IW#commit
+	 
+	 ---
+	 
+	 Custom Routing when indexing / searching - e.g all for a user will go to a single node - so then one needs to search only on one shard
+non blocking event IO based communication 	 
+
+search exec strat
+query_then_fetch
+dfs - distr freq and then it fires search
+
+index has multiple types
+	 
+	 
+	 ----
+	 
+	 Multi Tenancy
+
+A single index is already a major step forward, but what happens when we need to have more than one index. There are many cases for using multiple indices, an example can be storing an index per week of log files indexing, or even having different indices with different settings (one with memory storage, and one with file system storage).
+
+When we do that though, we would like to be able to search across multiple indices (among other operations).
+
+ach index can have its own settings which can override the master settings. For example, one index can be configured with memory storage and have 10 shards with 1 replica each, and another index can have file based storage with 1 shard and 10 replicas. All the index level settings can be controlled when creating an index either using a YAML or JSON format.
+
+The other commonly used implementation of Directory is a class called RAMDirectory. Although it
+exposes an interface identical to that of FSDirectory, RAMDirectory holds all its data in memory. This
+implementation is therefore useful for smaller indices that can be fully loaded in memory and can be
+destroyed upon the termination of an application. Because all data is held in the fast-access memory and
+not on a slower hard disk, RAMDirectory is suitable for situations where you need very quick access to
+the index, whether during indexing or searching. For instance, Lucene’s developers make extensive use of
+
+
+Unlike a database, Lucene has no notion of a fixed global schema.  In other words, each document you 
+add to the index is a blank slate and can be completely different from the document before it: it can have 
+whatever fields, with any indexing and storing and term vector options.  It need not have the same fields 
+as the previous document added.  It can even have the same field, with different options, than in other 
+documents. 
+ This is actually quite powerful: It allows you to take an iterative approach to building your index. You 
+can jump right in and index documents without having to pre-design the schema.  If you change your 
+mind about your fields, just start adding additional fields later on and then go back and re-index 
+previously added documents, or just rebuild the index. 
+
+Vector Space Model -- term vector and query vector 
+
+
+
+and boolean phrase
+Tokenize 
+Extract text and create document
+
+Analysis Phase
+
+LowerCase Filter
+StopWord
+PorterStemming
+Synonym
+Faceted Search
+Chain all
+
+Inverted Index Terms -> Postings or Documents
+
+Fields Analyze Y?N, TermVector Y/N, With Positions etc
+
+Boost document or field - considered when considering relevance
+
+
+FieldCache
+
+Phrase Query 
+Term Query
+Span Query 
+Lucene Syntax
+
+Term Freq Vector - Books like this
+
+Tika umbrella
+
+Boost by field
+
+spatial query
+
+AWS
+
+Rank expressions are mathematical functions that you can use to change how search results are ranked. By default, documents are ranked by a text relevance score that takes into account the proximity of the search terms and the frequency of those terms within a document. You can use rank expressions to include other factors in the ranking. For example, if you have a numeric field in your domain called 'popularity,' you can define a rank expression that combines popularity with the default text relevance score to rank relevant popular documents higher in your search results.
+
+Advanced Searching
+Like the other Amazon Web Services, CloudSearch allows you to get started with a modest effort and to add richness and complexity over time. You can easily implement advanced features such as faceted search, free text search, Boolean search expressions, customized relevance ranking, field-based sorting and searching, and text processing options such as stopwords, synonyms, and stemming.
+
+CloudSearch Programming
+
+
+Faceted Search (Each Facet and # of documents for that facet) - like Genre
+Default ranking by text relevance - content based - artist familiarity ranking boost documents at search time a specified rank expression is used
+
+
+SDF
+
+{  "type": "add",
+   "id": "tt0484562",
+   "version": 2,
+   "lang": "en",
+   "fields": { "title": "The Seeker: The Dark Is Rising",
+   "director": "Cunningham, David L.",
+   "year": 2007,
+   "genre": ["Adventure","Drama","Fantasy","Thriller"],
+   "actor": ["McShane, Ian","Eccleston, Christopher","Conroy, Frances","Ludwig, Alexander","Crewson, Wendy","Warner, Amelia","Cosmo, James","Hickey, John Benjamin","Piddock, Jim","Lockhart, Emma"] } },
+
+   
+   Managed Search on Heroku Add-Ons
+   
+Found ElasticSearch Scalable, managed full-text search clusters
+Bonsai ElasticSearch
