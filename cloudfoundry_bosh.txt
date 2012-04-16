@@ -1,0 +1,3 @@
+https://github.com/cloudfoundry/bosh-sample-release
+
+https://github.com/cloudfoundry/oss-docs/blob/master/bosh/documentation/documentation.md
