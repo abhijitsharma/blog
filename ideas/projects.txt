@@ -5,3 +5,24 @@ ES has River concept to integrate with external systems and index them and make 
 AWS crawler for Cloud Search 
 
 SQL over HBase
+
+Post on MR solution for ... Can also show Java solution
+
+select a, count(*) as cnt
+from x
+group by a
+order by cnt
+
+
+Blog posts
+
+advanced visitor patterns 
+http://c2.com/cgi/wiki?HierarchicalVisitorDiscussion
+http://homepages.cwi.nl/~markvdb/courses/SoftwareConstruction/JJTraveler.pdf
+
+A post on scalding vs Pig vs Hive
+
+http://blog.echen.me/2012/02/09/movie-recommendations-and-more-via-mapreduce-and-scalding/
+https://github.com/twitter/scalding/wiki/Getting-Started
+http://engineering.twitter.com/2012/03/generating-recommendations-with.html
+https://github.com/twitter/scalding
