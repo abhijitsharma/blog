@@ -1,0 +1,60 @@
+\documentclass[a4paper, 14pt]{amsart}
+\usepackage{multicol}
+
+\usepackage{amssymb,amsfonts,amsmath}
+\usepackage{graphicx}
+\usepackage{dcolumn}
+\usepackage{amsmath}
+\usepackage{xspace}
+\usepackage{rotating}
+\usepackage{xcolor}
+
+
+\usepackage{geometry}
+\usepackage{caption}
+
+
+\usepackage[hyphens]{url}
+\usepackage{hyperref}
+\hypersetup{breaklinks=true}
+
+\newtheorem{defn}{Observation}
+\geometry{letterpaper,textwidth=6.5in,hmarginratio=1:1,
+ textheight=9.5in,vmarginratio=1:1,heightrounded}
+
+
+\setlength{\columnsep}{12pt}
+
+\begin{document}
+R5: 780: 1 valid, incorrectly placed
+\\
+\\
+$
+\\
+(\neg S_{17} \wedge \textcolor{red} {S_{18}} \wedge \neg S_{10} \wedge \neg S_{27} \wedge \neg S_{28} \wedge \neg S_{20} \wedge \neg S_{37} \wedge \neg S_{38} \wedge \neg S_{30}) \vee
+\\
+(\neg S_{17} \wedge \neg S_{18} \wedge \textcolor{red} {S_{10}} \wedge \neg S_{27} \wedge \neg S_{28} \wedge \neg S_{20} \wedge \neg S_{37} \wedge \neg S_{38} \wedge \neg S_{30}) \vee
+\\
+(\neg S_{17} \wedge \neg S_{18} \wedge \neg S_{10} \wedge \textcolor{red} {S_{27}} \wedge \neg S_{28} \wedge \neg S_{20} \wedge \neg S_{37} \wedge \neg S_{38} \wedge \neg S_{30}) \vee
+\\
+(\neg S_{17} \wedge \neg S_{18} \wedge \neg S_{10} \wedge \neg S_{27} \wedge \neg S_{28} \wedge \textcolor{red} {S_{20}} \wedge \neg S_{37} \wedge \neg S_{38} \wedge \neg S_{30}) \vee
+\\
+(\neg S_{17} \wedge \neg S_{18} \wedge \neg S_{10} \wedge \neg S_{27} \wedge \neg S_{28} \wedge \neg S_{20} \wedge \textcolor{red} {S_{37}} \wedge \neg S_{38} \wedge \neg S_{30}) \vee
+\\
+(\neg S_{17} \wedge \neg S_{18} \wedge \neg S_{10} \wedge \neg S_{27} \wedge \neg S_{28} \wedge \neg S_{20} \wedge \neg S_{37} \wedge \textcolor{red} {S_{38}} \wedge \neg S_{30})
+\\
+$
+\\
+The optimized boolean formula representing $R_5$ by removing 
+\\
+clauses and references which use $S_{17}, S_{18}, S_{27}, S_{28}, S_{37}, S_{38}$ 
+\\
+as they are False (by $R_4$)
+\\
+$
+\\
+(\textcolor{red} {S_{10}} \wedge \neg S_{20} \wedge \neg S_{30}) \vee
+(\neg S_{10} \wedge \textcolor{red} {S_{20}} \wedge \neg S_{30})
+\\
+$
+\end{document}

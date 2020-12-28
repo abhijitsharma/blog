@@ -1,0 +1,55 @@
+\documentclass[a4paper, 14pt]{amsart}
+\usepackage{multicol}
+
+\usepackage{amssymb,amsfonts,amsmath}
+\usepackage{graphicx}
+\usepackage{dcolumn}
+\usepackage{amsmath}
+\usepackage{xspace}
+\usepackage{rotating}
+\usepackage{xcolor}
+
+
+\usepackage{geometry}
+\usepackage{caption}
+
+
+\usepackage[hyphens]{url}
+\usepackage{hyperref}
+\hypersetup{breaklinks=true}
+
+\newtheorem{defn}{Observation}
+\geometry{letterpaper,textwidth=6.5in,hmarginratio=1:1,
+ textheight=9.5in,vmarginratio=1:1,heightrounded}
+
+
+\setlength{\columnsep}{12pt}
+
+\begin{document}
+At least one
+\\
+\\
+$
+(S_{10} \vee S_{11} \vee S_{12} \vee S_{13} \vee S_{14} \vee S_{16} \vee S_{17} \vee S_{18}) \wedge
+\\
+(S_{20} \vee S_{21} \vee S_{22} \vee S_{23} \vee S_{24} \vee S_{26} \vee S_{27} \vee S_{28}) \wedge
+\\
+(S_{30} \vee S_{31} \vee S_{32} \vee S_{33} \vee S_{34} \vee S_{36} \vee S_{37} \vee S_{38})
+$
+\\
+\\
+The optimized boolean formula by removing references
+\\
+which use $S_{17}, S_{13}, S_{18}, S_{17}, S_{23}, S_{28}, S_{17}, S_{33}, S_{38}$ 
+\\
+as they are False (by $R_4$)
+\\
+\\
+$
+(S_{10} \vee S_{11} \vee S_{12} \vee S_{14} \vee S_{16}) \wedge
+\\
+(S_{20} \vee S_{21} \vee S_{22} \vee S_{24} \vee S_{26}) \wedge
+\\
+(S_{30} \vee S_{31} \vee S_{32} \vee S_{34} \vee S_{36})
+$
+\end{document}

@@ -1,0 +1,68 @@
+\documentclass[a4paper, 14pt]{amsart}
+\usepackage{multicol}
+
+\usepackage{amssymb,amsfonts,amsmath}
+\usepackage{graphicx}
+\usepackage{dcolumn}
+\usepackage{amsmath}
+\usepackage{xspace}
+\usepackage{rotating}
+\usepackage{xcolor}
+
+
+\usepackage{geometry}
+\usepackage{caption}
+
+
+\usepackage[hyphens]{url}
+\usepackage{hyperref}
+\hypersetup{breaklinks=true}
+
+\newtheorem{defn}{Observation}
+\geometry{letterpaper,textwidth=6.5in,hmarginratio=1:1,
+ textheight=9.5in,vmarginratio=1:1,heightrounded}
+
+
+\setlength{\columnsep}{12pt}
+
+\begin{document}
+R2: 614: 1 valid, incorrectly placed
+\\
+\\
+$
+(\neg S_{16} \wedge \textcolor{red} {S_{11}} \wedge \neg S_{14} \wedge \neg S_{26} \wedge \neg S_{21} \wedge \neg S_{24} \wedge \neg S_{36} \wedge \neg S_{31} \wedge \neg S_{34}) \vee
+\\
+(\neg S_{16} \wedge \neg S_{11} \wedge \textcolor{red} {S_{14}} \wedge \neg S_{26} \wedge \neg S_{21} \wedge \neg S_{24} \wedge \neg S_{36} \wedge \neg S_{31} \wedge \neg S_{34}) \vee
+\\
+(\neg S_{16} \wedge \neg S_{11} \wedge \neg S_{14} \wedge \textcolor{red} {S_{26}} \wedge \neg S_{21} \wedge \neg S_{24} \wedge \neg S_{36} \wedge \neg S_{31} \wedge \neg S_{34}) \vee
+\\
+(\neg S_{16} \wedge \neg S_{11} \wedge \neg S_{14} \wedge \neg S_{26} \wedge \neg S_{21} \wedge \textcolor{red} {S_{24}} \wedge \neg S_{36} \wedge \neg S_{31} \wedge \neg S_{34}) \vee
+\\
+(\neg S_{16} \wedge \neg S_{11} \wedge \neg S_{14} \wedge \neg S_{26} \wedge \neg S_{21} \wedge \neg S_{24} \wedge \textcolor{red} {S_{36}} \wedge \neg S_{31} \wedge \neg S_{34}) \vee
+\\
+(\neg S_{16} \wedge \neg S_{11} \wedge \neg S_{14} \wedge \neg S_{26} \wedge \neg S_{21} \wedge \neg S_{24} \wedge \neg S_{36} \wedge \textcolor{red} {S_{31}} \wedge \neg S_{34})
+\\
+$
+\\
+The optimized boolean formula representing $R_2$ by 
+\\
+removing $\neg S_{16}, \neg S_{21}, \neg S_{34}$ as they are True 
+\\
+(negation of False variables) - digit is not in the correct  place
+\\
+\\
+$
+(\textcolor{red} {S_{11}} \wedge \neg S_{14} \wedge \neg S_{26} \wedge \neg S_{24} \wedge \neg S_{36} \wedge \neg S_{31}) \vee
+\\
+(\neg S_{11} \wedge \textcolor{red} {S_{14}} \wedge \neg S_{26} \wedge \neg S_{24} \wedge \neg S_{36} \wedge \neg S_{31}) \vee
+\\
+(\neg S_{11} \wedge \neg S_{14} \wedge \textcolor{red} {S_{26}} \wedge \neg S_{24} \wedge \neg S_{36} \wedge \neg S_{31}) \vee
+\\
+(\neg S_{11} \wedge \neg S_{14} \wedge \neg S_{26} \wedge \textcolor{red} {S_{24}} \wedge \neg S_{36} \wedge \neg S_{31}) \vee
+\\
+(\neg S_{11} \wedge \neg S_{14} \wedge \neg S_{26} \wedge \neg S_{24} \wedge \textcolor{red} {S_{36}} \wedge \neg S_{31}) \vee
+\\
+(\neg S_{11} \wedge \neg S_{14} \wedge \neg S_{26} \wedge \neg S_{24} \wedge \neg S_{36} \wedge \textcolor{red} {S_{31}})
+\\
+$
+\end{document}

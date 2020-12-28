@@ -1,0 +1,55 @@
+\documentclass[a4paper, 14pt]{amsart}
+\usepackage{multicol}
+
+\usepackage{amssymb,amsfonts,amsmath}
+\usepackage{graphicx}
+\usepackage{dcolumn}
+\usepackage{amsmath}
+\usepackage{xspace}
+\usepackage{rotating}
+\usepackage{xcolor}
+
+
+\usepackage{geometry}
+\usepackage{caption}
+
+
+\usepackage[hyphens]{url}
+\usepackage{hyperref}
+\hypersetup{breaklinks=true}
+
+\newtheorem{defn}{Observation}
+\geometry{letterpaper,textwidth=6.5in,hmarginratio=1:1,
+ textheight=9.5in,vmarginratio=1:1,heightrounded}
+
+
+\setlength{\columnsep}{12pt}
+
+\begin{document}
+R1: 682 : 1 valid and  correctly placed
+\\
+\\
+$
+\\
+(\textcolor{red} {S_{16}} \wedge \neg S_{18} \wedge \neg S_{12} \wedge \neg S_{26} \wedge \neg S_{28} \wedge \neg S_{22} \wedge \neg S_{36} \wedge \neg S_{38} \wedge \neg S_{32}) \vee
+\\
+(\neg S_{16} \wedge \neg S_{18} \wedge \neg S_{12} \wedge \neg S_{26} \wedge \textcolor{red} {S_{28}} \wedge \neg S_{22} \wedge \neg S_{36} \wedge \neg S_{38} \wedge \neg S_{32}) \vee
+\\
+(\neg S_{16} \wedge \neg S_{18} \wedge \neg S_{12} \wedge \neg S_{26} \wedge \neg S_{28} \wedge \neg S_{22} \wedge \neg S_{36} \wedge \neg S_{38} \wedge \textcolor{red} {S_{32}})
+\\
+$
+\\
+The optimized boolean formula representing $R_1$ by eliminating 
+\\
+the second clause (as $S_{28}$ is False) and removing all occurrences 
+\\
+of variables $S_{18}, S_{28}, S_{38}$ (as their negation is True)
+\\
+$
+\\
+(\textcolor{red} {S_{16}} \wedge \neg S_{12} \wedge \neg S_{26} \wedge  \neg S_{22} \wedge \neg S_{36} \wedge \neg S_{32}) \vee
+\\
+(\neg S_{16} \wedge \neg S_{12} \wedge \neg S_{26} \wedge \neg S_{22} \wedge \neg S_{36} \wedge \textcolor{red} {S_{32}})
+\\
+$
+\end{document}

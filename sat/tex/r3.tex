@@ -1,0 +1,76 @@
+\documentclass[a4paper, 14pt]{amsart}
+\usepackage{multicol}
+
+\usepackage{amssymb,amsfonts,amsmath}
+\usepackage{graphicx}
+\usepackage{dcolumn}
+\usepackage{amsmath}
+\usepackage{xspace}
+\usepackage{rotating}
+\usepackage{xcolor}
+
+
+\usepackage{geometry}
+\usepackage{caption}
+
+
+\usepackage[hyphens]{url}
+\usepackage{hyperref}
+\hypersetup{breaklinks=true}
+
+\newtheorem{defn}{Observation}
+\geometry{letterpaper,textwidth=6.5in,hmarginratio=1:1,
+ textheight=9.5in,vmarginratio=1:1,heightrounded}
+
+
+\setlength{\columnsep}{12pt}
+
+\begin{document}
+R3: 206: 2 valid, incorrectly placed
+\\
+\\
+$
+(\neg S_{12} \wedge \textcolor{red} {S_{10}} \wedge \neg S_{16} \wedge \textcolor{red} {S_{22}} \wedge \neg S_{20} \wedge \neg S_{26} \wedge \neg S_{32} \wedge \neg S_{30} \wedge \neg S_{36}) \vee
+\\
+(\neg S_{12} \wedge \textcolor{red} {S_{10}} \wedge \neg S_{16} \wedge \neg S_{22} \wedge \neg S_{20} \wedge \neg S_{26} \wedge \textcolor{red} {S_{32}} \wedge \neg S_{30} \wedge \neg S_{36}) \vee
+\\
+(\neg S_{12} \wedge \neg S_{10} \wedge \neg S_{16} \wedge \textcolor{red} {S_{22}} \wedge \neg S_{20} \wedge \neg S_{26} \wedge \neg S_{32} \wedge \textcolor{red} {S_{30}} \wedge \neg S_{36}) \vee
+\\
+(\neg S_{12} \wedge \neg S_{10} \wedge \textcolor{red} {S_{16}} \wedge \textcolor{red} {S_{22}} \wedge \neg S_{20} \wedge \neg S_{26} \wedge \neg S_{32} \wedge \neg S_{30} \wedge \neg S_{36}) \vee
+\\
+(\neg S_{12} \wedge \neg S_{10} \wedge \textcolor{red} {S_{16}} \wedge \neg S_{22} \wedge \neg S_{20} \wedge \neg S_{26} \wedge \textcolor{red} {S_{32}} \wedge \neg S_{30} \wedge \neg S_{36}) \vee
+\\
+(\neg S_{12} \wedge \neg S_{10} \wedge \neg S_{16} \wedge \neg S_{22} \wedge \neg S_{20} \wedge \textcolor{red} {S_{26}} \wedge \textcolor{red} {S_{32}} \wedge \neg S_{30} \wedge \neg S_{36}) \vee
+\\
+(\neg S_{12} \wedge \textcolor{red} {S_{10}} \wedge \neg S_{16} \wedge \neg S_{22} \wedge \neg S_{20} \wedge \textcolor{red} {S_{26}} \wedge \neg S_{32} \wedge \neg S_{30} \wedge \neg S_{36}) \vee
+\\
+(\neg S_{12} \wedge \neg S_{10} \wedge \textcolor{red} {S_{16}} \wedge \neg S_{22} \wedge \neg S_{20} \wedge \neg S_{26} \wedge \neg S_{32} \wedge \textcolor{red} {S_{30}} \wedge \neg S_{36}) \vee
+\\
+(\neg S_{12} \wedge \neg S_{10} \wedge \neg S_{16} \wedge \neg S_{22} \wedge \neg S_{20} \wedge \textcolor{red} {S_{26}} \wedge \neg S_{32} \wedge \textcolor{red} {S_{30}} \wedge \neg S_{36})
+\\
+$
+\\
+The optimized boolean formula representing $R_3$ by removing $\neg S_{12}, \neg S_{20}, \neg S_{36}$
+\\
+ as they are True (negation of False variables) - digits 2,0,6 are not in the 
+\\
+correct  place. Also by $R_2$, $S_{16}$  is false. Removing  clause 4,5,7 and references to
+\\
+$\neg S_{16}$ (as it is True)
+\\
+$
+\\
+( \textcolor{red} {S_{10}} \wedge  \textcolor{red} {S_{22}} \wedge \neg S_{26} \wedge \neg S_{32} \wedge \neg S_{30}) \vee
+\\
+( \textcolor{red} {S_{10}} \wedge \neg S_{22} \wedge \neg S_{26} \wedge  \textcolor{red} {S_{32}} \wedge \neg S_{30}) \vee
+\\
+(\neg S_{10} \wedge  \textcolor{red} {S_{22}} \wedge \neg S_{26} \wedge \neg S_{32} \wedge  \textcolor{red} {S_{30}}) \vee
+\\
+(\neg S_{10} \wedge \neg S_{22} \wedge  \textcolor{red} {S_{26}} \wedge  \textcolor{red} {S_{32}} \wedge \neg S_{30}) \vee
+\\
+( \textcolor{red} {S_{10}} \wedge \neg S_{22} \wedge  \textcolor{red} {S_{26}} \wedge \neg S_{32} \wedge \neg S_{30}) \vee
+\\
+(\neg S_{10} \wedge \neg S_{22} \wedge  \textcolor{red} {S_{26}} \wedge \neg S_{32} \wedge  \textcolor{red} {S_{30}})
+\\
+$
+\end{document}

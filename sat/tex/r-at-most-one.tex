@@ -1,0 +1,63 @@
+\documentclass[a4paper, 14pt]{amsart}
+\usepackage{multicol}
+
+\usepackage{amssymb,amsfonts,amsmath}
+\usepackage{graphicx}
+\usepackage{dcolumn}
+\usepackage{amsmath}
+\usepackage{xspace}
+\usepackage{rotating}
+\usepackage{xcolor}
+
+
+\usepackage{geometry}
+\usepackage{caption}
+
+
+\usepackage[hyphens]{url}
+\usepackage{hyperref}
+\hypersetup{breaklinks=true}
+
+\newtheorem{defn}{Observation}
+\geometry{letterpaper,textwidth=6.5in,hmarginratio=1:1,
+ textheight=9.5in,vmarginratio=1:1,heightrounded}
+
+
+\setlength{\columnsep}{12pt}
+
+\begin{document}
+At most one
+\\
+\\
+$
+(S_{10} \wedge \neg S_{11} \wedge \neg S_{12} \wedge \neg S_{14} \wedge \neg S_{16}) \vee (\neg S_{10} \wedge S_{11} \wedge \neg S_{12} \wedge \neg S_{14} \wedge \neg S_{16}) \vee
+\\
+(\neg S_{10} \wedge \neg S_{11} \wedge S_{12} \wedge \neg S_{14} \wedge \neg S_{16}) \vee (\neg S_{10} \wedge \neg S_{11} \wedge \neg S_{12} \wedge S_{14} \wedge \neg S_{16}) \vee
+\\
+(\neg S_{10} \wedge \neg S_{11} \wedge \neg S_{12} \wedge \neg S_{14} \wedge S_{16}) \vee (S_{20} \wedge \neg S_{21} \wedge \neg S_{22} \wedge \neg S_{24} \wedge \neg S_{26}) \vee
+\\
+(\neg S_{20} \wedge S_{21} \wedge \neg S_{22} \wedge \neg S_{24} \wedge \neg S_{26}) \vee (\neg S_{20} \wedge \neg S_{21} \wedge S_{22} \wedge \neg S_{24} \wedge \neg S_{26}) \vee
+\\
+(\neg S_{20} \wedge \neg S_{21} \wedge \neg S_{22} \wedge S_{24} \wedge \neg S_{26}) \vee (\neg S_{20} \wedge \neg S_{21} \wedge \neg S_{22} \wedge \neg S_{24} \wedge S_{26}) \vee
+\\
+(S_{30} \wedge \neg S_{31} \wedge \neg S_{32} \wedge \neg S_{34} \wedge \neg S_{36}) \vee (\neg S_{30} \wedge S_{31} \wedge \neg S_{32} \wedge \neg S_{34} \wedge \neg S_{36}) \vee
+\\
+(\neg S_{30} \wedge \neg S_{31} \wedge S_{32} \wedge \neg S_{34} \wedge \neg S_{36}) \vee (\neg S_{30} \wedge \neg S_{31} \wedge \neg S_{32} \wedge S_{34} \wedge \neg S_{36}) \vee
+\\
+(\neg S_{30} \wedge \neg S_{31} \wedge \neg S_{32} \wedge \neg S_{34} \wedge S_{36})$
+\\
+\\
+The optimized boolean formula by removing clauses and references by
+\\
+$S_{16}, S_{21}, S_{34}$ are False (by rule $R_2$) and $S_{12}, S_{20}, S_{36}$ are False (by rule $R_3$)
+\\
+\\
+$
+(S_{10} \wedge \neg S_{11} \wedge \neg S_{14}) \vee (\neg S_{10} \wedge S_{11} \wedge \neg S_{14}) \vee (\neg S_{10} \wedge \neg S_{11} \wedge S_{14}) \vee 
+\\
+(S_{22} \wedge \neg S_{24} \wedge \neg S_{26}) \vee (\neg S_{22} \wedge S_{24} \wedge \neg S_{26}) \vee (\neg S_{22} \wedge \neg S_{24} \wedge S_{26}) \vee
+\\
+(S_{30} \wedge \neg S_{31} \wedge \neg S_{32}) \vee (\neg S_{30} \wedge S_{31} \wedge \neg S_{32}) \vee (\neg S_{30} \wedge \neg S_{31} \wedge S_{32})
+\\
+$
+\end{document}
