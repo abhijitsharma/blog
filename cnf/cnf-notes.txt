@@ -1,0 +1,134 @@
+Todo
+
+- CNF background
+- Using Truth Table
+- Using CNF logical conversion
+
+References
+
+https://www.cs.jhu.edu/~jason/tutorials/convert-to-CNF.html
+https://www.cse.iitb.ac.in/~akg/courses/2020-ar/
+https://www.cs.jhu.edu/~jason/325/
+Grammars for Propositional Logic
+https://www.youtube.com/watch?v=2mF471Tn27Q
+
+https://www.ifi.uzh.ch/en/ailab/teaching/formalmethods2013.html
+ANTLR grammar for prop logic
+
+~
+
+?start: sum
+      | NAME "=" sum    -> assign_var
+
+?sum: product
+    | sum "+" product   -> add
+    | sum "-" product   -> sub
+
+?product: atom
+    | product "*" atom  -> mul
+    | product "/" atom  -> div
+
+?atom: NUMBER           -> number
+     | "-" atom         -> neg
+     | NAME             -> var
+     | "(" sum ")"
+
+%import common.CNAME -> NAME
+%import common.NUMBER
+%import common.WS_INLINE
+%ignore WS_INLINE
+
+~
+?start: iff
+
+?iff: implication
+    | iff "<->" implication -> iff
+
+?implication: or
+    | implication "->" or -> implication
+
+?or: and
+    | or "v" and -> or
+
+?and: negation
+    | and "^" negation -> and
+    
+?negation: "~" expression -> neg
+    | expression 
+
+?expression: "(" iff ")" 
+    | NAME -> var
+
+%import common.CNAME -> NAME
+%import common.WS_INLINE
+%ignore WS_INLINE
+
+
+~(a v ~b v (c -> d))
+~a v b
+a v b  ^ c ^ e -> f
+
+precedence
+~, ^, v, ->, <->
+
+
+TODO
+
+- incorporate * wild card in grammar
+
+
+~
+grammar boolean ;
+2
+3 entry : equivalence EOF ;
+4 equivalence : implication
+5 ( '<->' implication )* ;
+6 implication : disjunction
+7 ( '->' disjunction )* ;
+8 disjunction : conjunction
+9 ( '||' conjunction )* ;
+10 conjunction : negation
+11 ( '&&' negation )* ;
+12 negation : '!' parenthesis
+13 | parenthesis ;
+14 parenthesis : '(' equivalence ')'
+15 | atom ;
+16 atom : 'T' | 'F' | VARIABLE ;
+17 VARIABLE : ('a '.. 'z ')+ ;
+
+(a v b) -> (c -> d)
+(a v b) -> (~c v d)
+~(a v b) v (~c v d)
+(~a & ~b) v (~c v d)
+(~c v d) v (~a & ~b)
+((~c v d) v ~a) & ((~c v d) v ~b)
+(~a v ~c v d) & (~b v ~c v d)
+
+
+https://ocw.mit.edu/courses/health-sciences-and-technology/hst-947-medical-artificial-intelligence-spring-2005/lecture-notes/ch10_logic2a.pdf
+
+https://leanprover.github.io/logic_and_proof/first_order_logic_in_lean.html
+
+Misc
+
+Zero trust
+Spiffe Spire
+mseg
+AWS security - IAM, Keys, encrypt
+
+
+?start: or
+
+?or: and
+    | or "v" and   -> or
+
+?and: atom
+    | and "^" atom  -> and
+
+?atom: NAME           -> var
+     | "(" or ")"
+
+%import common.CNAME -> NAME
+%import common.WS_INLINE
+%ignore WS_INLINE
+
