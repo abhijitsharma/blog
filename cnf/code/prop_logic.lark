@@ -16,6 +16,10 @@
     | expression
 
 ?expression: "(" iff ")"
+    | atom
+
+?atom: "T" -> true
+    | "F" -> false
     | variable -> var
 
 ?variable: ("a".."z")+

@@ -15,54 +15,6 @@ https://www.youtube.com/watch?v=2mF471Tn27Q
 https://www.ifi.uzh.ch/en/ailab/teaching/formalmethods2013.html
 ANTLR grammar for prop logic
 
-~
-
-?start: sum
-      | NAME "=" sum    -> assign_var
-
-?sum: product
-    | sum "+" product   -> add
-    | sum "-" product   -> sub
-
-?product: atom
-    | product "*" atom  -> mul
-    | product "/" atom  -> div
-
-?atom: NUMBER           -> number
-     | "-" atom         -> neg
-     | NAME             -> var
-     | "(" sum ")"
-
-%import common.CNAME -> NAME
-%import common.NUMBER
-%import common.WS_INLINE
-%ignore WS_INLINE
-
-~
-?start: iff
-
-?iff: implication
-    | iff "<->" implication -> iff
-
-?implication: or
-    | implication "->" or -> implication
-
-?or: and
-    | or "v" and -> or
-
-?and: negation
-    | and "^" negation -> and
-    
-?negation: "~" expression -> neg
-    | expression 
-
-?expression: "(" iff ")" 
-    | NAME -> var
-
-%import common.CNAME -> NAME
-%import common.WS_INLINE
-%ignore WS_INLINE
-
 
 ~(a v ~b v (c -> d))
 ~a v b
@@ -74,7 +26,10 @@ precedence
 
 TODO
 
-- incorporate * wild card in grammar
+- XOR not implemented
+- double negation
+- repeated
+
 
 
 ~
@@ -116,19 +71,4 @@ Spiffe Spire
 mseg
 AWS security - IAM, Keys, encrypt
 
-
-?start: or
-
-?or: and
-    | or "v" and   -> or
-
-?and: atom
-    | and "^" atom  -> and
-
-?atom: NAME           -> var
-     | "(" or ")"
-
-%import common.CNAME -> NAME
-%import common.WS_INLINE
-%ignore WS_INLINE
 

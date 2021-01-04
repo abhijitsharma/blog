@@ -12,6 +12,7 @@ class CalculateTree(Transformer):
     number = float
 
     def __init__(self):
+        super().__init__()
         self.vars = {}
 
     def assign_var(self, name, value):
@@ -41,8 +42,11 @@ def main():
 
 
 def test():
-    print(prop_logic_tree("a | b").pretty())
-    print(prop_logic_tree("~(a | ~b | (c -> d))").pretty())
+    print(prop_logic_tree("a -> b"))
+
+    # print(prop_logic_tree("a & b").pretty())
+    # print(prop_logic_tree("~(a | ~b | (c -> d))").pretty())
+    # print(prop_logic_tree("a & b | T").pretty())
 
 
 if __name__ == '__main__':
