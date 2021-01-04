@@ -1,29 +1,50 @@
-from lark import Lark
+from lark import Lark, Transformer, v_args
 
-l = Lark('''
-?start: iff
 
-?iff: implication
-    | iff "<->" implication -> iff
+def load_grammar():
+    with open("prop_logic.lark", "r") as f:
+        return f.read()
 
-?implication: or
-    | implication "->" or -> implication
 
-?or: and
-    | or "v" and -> or
+@v_args(inline=True)  # Affects the signatures of the methods
+class CalculateTree(Transformer):
+    from operator import add, sub, mul, truediv as div, neg
+    number = float
 
-?and: negation
-    | and "^" negation -> and
-    
-?negation: "~" expression -> neg
-    | expression 
+    def __init__(self):
+        self.vars = {}
 
-?expression: "(" iff ")" 
-    | NAME -> var
+    def assign_var(self, name, value):
+        self.vars[name] = value
+        return value
 
-%import common.CNAME -> NAME
-%import common.WS_INLINE
-%ignore WS_INLINE
-''')
+    def var(self, name):
+        try:
+            return self.vars[name]
+        except KeyError:
+            raise Exception("Variable not found: %s" % name)
 
-print(l.parse("a ^ b"))
+
+# prop_logic_parser = Lark(grammar, parser='lalr', transformer=CalculateTree())
+grammar = load_grammar()
+prop_logic_parser = Lark(grammar, parser='lalr')
+prop_logic_tree = prop_logic_parser.parse
+
+
+def main():
+    while True:
+        try:
+            s = input('> ')
+        except EOFError:
+            break
+        print(prop_logic_tree(s))
+
+
+def test():
+    print(prop_logic_tree("a | b").pretty())
+    print(prop_logic_tree("~(a | ~b | (c -> d))").pretty())
+
+
+if __name__ == '__main__':
+    test()
+    # main()

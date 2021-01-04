@@ -7,17 +7,18 @@
     | implication "->" or -> implication
 
 ?or: and
-    | or "v" and -> or
+    | or "|" and -> or
 
 ?and: negation
-    | and "^" negation -> and
-    
+    | and "&" negation -> and
+
 ?negation: "~" expression -> neg
-    | expression 
+    | expression
 
-?expression: "(" iff ")" 
-    | NAME -> var
+?expression: "(" iff ")"
+    | variable -> var
 
-%import common.CNAME -> NAME
+?variable: ("a".."z")+
+
 %import common.WS_INLINE
 %ignore WS_INLINE
