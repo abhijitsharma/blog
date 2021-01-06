@@ -1,4 +1,4 @@
-from lark import Lark, Transformer, v_args
+from lark import Lark, Tree, Token
 
 
 def load_grammar():
@@ -6,30 +6,68 @@ def load_grammar():
         return f.read()
 
 
-@v_args(inline=True)  # Affects the signatures of the methods
-class CalculateTree(Transformer):
-    from operator import add, sub, mul, truediv as div, neg
-    number = float
+class Expression:
+    ops = {'implication': '->', 'iff': '<->', 'neg': '~', 'and': '&', 'or': '|'}
 
-    def __init__(self):
-        super().__init__()
-        self.vars = {}
+    def __init__(self, op, *args):
+        "Op is a string and args are Expressions"
+        self.op = op
+        self.args = args
 
-    def assign_var(self, name, value):
-        self.vars[name] = value
-        return value
+    @property
+    def _to_str(self):
+        l = ['(']
+        # TODO assert self.args <= 2
+        for i in range(len(self.args)):
+            e = self.args[i]
+            if isinstance(e, Expression):
+                if i == 0:
+                    if self.is_unary():
+                        l += [self.ops[self.op]]
+                        l += e._to_str
+                    else:
+                        l += e._to_str
+                        l += [' ', self.ops[self.op], ' ']
+                elif i == 1:
+                    l += e._to_str
+            else:
+                l += ['%s' % (e,)]
+        l += [')']
+        return l
 
-    def var(self, name):
-        try:
-            return self.vars[name]
-        except KeyError:
-            raise Exception("Variable not found: %s" % name)
+    def to_str(self):
+        """Returns an indented string representation of the tree.
+        """
+        return ''.join(self._to_str)
+
+    def is_unary(self):
+        return len(self.args) == 1
 
 
-# prop_logic_parser = Lark(grammar, parser='lalr', transformer=CalculateTree())
+def to_expression(tree: Tree) -> Expression:
+    #    print(f'in _transform {tree} children {len(tree.children)}')
+    # TODO assert tree.children <= 2
+    left, right = None, None
+    for i in range(len(tree.children)):
+        n = tree.children[i]
+        #        print(f'type {type(n)}')
+        if isinstance(n, Tree):
+            if i == 0:
+                left = to_expression(n)
+            elif i == 1:
+                right = to_expression(n)
+        else:
+            return Expression(tree.data, n.value)
+
+    if right is None:
+        return Expression(tree.data, left)
+    else:
+        return Expression(tree.data, left, right)
+
+
 grammar = load_grammar()
 prop_logic_parser = Lark(grammar, parser='lalr')
-prop_logic_tree = prop_logic_parser.parse
+to_logic_tree = prop_logic_parser.parse
 
 
 def main():
@@ -38,15 +76,19 @@ def main():
             s = input('> ')
         except EOFError:
             break
-        print(prop_logic_tree(s))
+        print(to_logic_tree(s))
 
 
 def test():
-    print(prop_logic_tree("a -> b"))
+    print(to_expression(to_logic_tree("a -> b")).to_str())
+    print(to_expression(to_logic_tree("~(a -> b)")).to_str())
+    print(to_expression(to_logic_tree("~a")).to_str())
+    print(to_expression(to_logic_tree("a -> b -> c")).to_str())
+    print(to_expression(to_logic_tree("~(a | ~b | (c -> d))")).to_str())
 
-    # print(prop_logic_tree("a & b").pretty())
-    # print(prop_logic_tree("~(a | ~b | (c -> d))").pretty())
-    # print(prop_logic_tree("a & b | T").pretty())
+
+# TODO fix T, F
+# print(prop_logic_tree("a & b | T").pretty())
 
 
 if __name__ == '__main__':
