@@ -71,4 +71,16 @@ Spiffe Spire
 mseg
 AWS security - IAM, Keys, encrypt
 
+Code snippets
+
+@v_args(inline=True)  # Affects the signatures of the methods
+class ConvertToExpression(Transformer):
+    def __init__(self):
+        super().__init__()
+
+    def implication(self, left, right):
+        print(f'-> left : {left} : right : {right}')
+        return Expression('->', left.data, right.data)
+
+
 
