@@ -101,7 +101,14 @@ def _to_cnf(expression: Expression, func) -> Expression:
 def eliminate_implication(expression):
     assert isinstance(expression, Expression)
     if expression.op == Expression.IMPLICATION:
-        return Expression(Expression.OR, Expression(Expression.NEG, expression.args[0]), expression.args[1])
+        return Expression(Expression.OR,
+                          Expression(Expression.NEG, expression.args[0]), expression.args[1])
+    elif expression.op == Expression.IFF:
+        return Expression(Expression.OR,
+                          Expression(Expression.OR,
+                                     Expression(Expression.NEG, expression.args[0]), expression.args[1]),
+                          Expression(Expression.OR,
+                                     Expression(Expression.NEG, expression.args[1]), expression.args[0]))
     return expression
 
 
@@ -140,25 +147,31 @@ def main():
 
 
 def test():
-    _test("a")
-    _test("~a")
-    _test("a -> b")
-    _test("a -> b -> c")
-    _test("a -> b")
-    _test("~(~a)")
-    _test("~(a -> b)")
-    _test("~(a | ~b | (c -> d))")
+    _test("a", "(a)")
+    _test("~a", "(~(a))")
+    _test("a -> b", "((~(a)) | (b))")
+    _test("a <-> b", "(((~(a)) | (b)) | ((~(b)) | (a)))")
+    _test("a -> b -> c", "(((a) & (~(b))) | (c))")
+    _test("~(~a)", "(a)")
+    _test("~(~(~a))", "(~(a))")
+    _test("~(a | ~(b | ~(c | d)))", "((~(a)) & ((b) | ((~(c)) & (~(d)))))")
+    _test("~(a -> b)", "((a) & (~(b)))")
+    _test("~(a | ~b | (c -> d))", "(((~(a)) & (b)) & ((c) & (~(d))))")
 
 
-def _test(s):
+def _test(s, e):
     expression = to_expression(to_logic_tree(s))
     cnf_expression = to_cnf(expression)
     print(">>>>>>>")
-    print(f's: "{s}" \nexp: "{expression.to_str()}" \ncnf: "{cnf_expression.to_str()}"')
+    _s = cnf_expression.to_str()
+    print(f's: "{s}" \ncnf: "{_s}" \nexpected "{e}"')
     print(">>>>>>>")
+    assert _s == e
+
 
 # TODO fix T, F
 # print(prop_logic_tree("a & b | T").pretty())
+# TODO add more <->
 
 
 if __name__ == '__main__':
