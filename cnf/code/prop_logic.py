@@ -84,10 +84,10 @@ def _to_cnf(expression: Expression, func) -> Expression:
         n = expression.args[i]
         if isinstance(n, Expression):
             if i == 0:
-                left = to_cnf(n)
+                left = _to_cnf(n, func)
                 # print(f'left {left.to_str()}')
             elif i == 1:
-                right = to_cnf(n)
+                right = _to_cnf(n, func)
                 # print(f'right {right.to_str()}')
         else:
             return Expression(expression.op, n)
@@ -114,10 +114,9 @@ def eliminate_implication(expression):
 
 def push_negation_inwards(expression):
     assert isinstance(expression, Expression)
-    # print(f'in push_negation {expression.to_str()}')
     if expression.op == Expression.NEG:
+        # print(f'in push_negation {expression.to_str()}')
         child = expression.args[0]
-        # print(f'in push_negation:child {child.to_str()}')
         if isinstance(child, Expression):
             if child.op == Expression.OR:
                 return Expression(Expression.AND,
@@ -154,7 +153,11 @@ def test():
     _test("a -> b -> c", "(((a) & (~(b))) | (c))")
     _test("~(~a)", "(a)")
     _test("~(~(~a))", "(~(a))")
+    _test("~(c | d)", "((~(c)) & (~(d)))")
+    _test("~(~c | ~d)", "((c) & (d))")
+    _test("~(b | ~(c | d))", "((~(b)) & ((c) | (d)))")
     _test("~(a | ~(b | ~(c | d)))", "((~(a)) & ((b) | ((~(c)) & (~(d)))))")
+    _test("~(a -> ~(b -> ~(c -> d)))", "((a) & ((~(b)) | ((c) & (~(d)))))")
     _test("~(a -> b)", "((a) & (~(b)))")
     _test("~(a | ~b | (c -> d))", "(((~(a)) & (b)) & ((c) & (~(d))))")
 
@@ -171,7 +174,7 @@ def _test(s, e):
 
 # TODO fix T, F
 # print(prop_logic_tree("a & b | T").pretty())
-# TODO add more <->
+# TODO add more <-> tests
 
 
 if __name__ == '__main__':
