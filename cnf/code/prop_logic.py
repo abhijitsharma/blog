@@ -1,4 +1,4 @@
-from lark import Lark, Tree, Token
+from lark import Lark, Tree
 
 
 def load_grammar():
@@ -18,7 +18,7 @@ class Expression:
     @property
     def _to_str(self):
         l = ['(']
-        # TODO assert self.args <= 2
+        assert len(self.args) <= 2
         for i in range(len(self.args)):
             e = self.args[i]
             if isinstance(e, Expression):
@@ -48,7 +48,7 @@ def to_expression(tree: Tree) -> Expression:
     assert isinstance(tree, Tree)
 
     #    print(f'in _transform {tree} children {len(tree.children)}')
-    # TODO assert tree.children <= 2
+    assert len(tree.children) <= 2
     left, right = None, None
     for i in range(len(tree.children)):
         n = tree.children[i]
@@ -71,6 +71,7 @@ def to_cnf(expression: Expression) -> Expression:
     assert isinstance(expression, Expression)
     expression = _to_cnf(expression, eliminate_implication)
     expression = _to_cnf(expression, push_negation_inwards)
+    expression = _to_cnf(expression, distribute_and_over_or)
     return expression
 
 
@@ -131,6 +132,36 @@ def push_negation_inwards(expression):
     return expression
 
 
+def distribute_and_over_or(expression):
+    assert isinstance(expression, Expression)
+    if expression.op == Expression.OR:
+        # print(f'in distribute_and_over_or {expression.to_str()}')
+        left = expression.args[0]
+        right = expression.args[1]
+        # (a & b) | (c & d) = (a | c) & (a | d) & (b | c) & (b | d)
+        if left.op == Expression.AND and right.op == Expression.AND:
+            l0, l1, r0, r1 = left.args[0], left.args[1], right.args[0], right.args[1]
+            return Expression(Expression.AND,
+                              Expression(Expression.AND,
+                                         Expression(Expression.OR, l0, r0),
+                                         Expression(Expression.OR, l0, r1)),
+                              Expression(Expression.AND,
+                                         Expression(Expression.OR, l1, r0),
+                                         Expression(Expression.OR, l1, r1)))
+        # (a = Exp other than AND) | (b & c) = (a | b) & (a | c)
+        elif right.op == Expression.AND:
+            r0, r1 = right.args[0], right.args[1]
+            return Expression(Expression.AND,
+                              Expression(Expression.OR, left, r0),
+                              Expression(Expression.OR, left, r1))
+        elif left.op == Expression.AND:
+            l0, l1 = left.args[0], left.args[1]
+            return Expression(Expression.AND,
+                              Expression(Expression.OR, l0, right),
+                              Expression(Expression.OR, l1, right))
+    return expression
+
+
 grammar = load_grammar()
 prop_logic_parser = Lark(grammar, parser='lalr')
 to_logic_tree = prop_logic_parser.parse
@@ -150,16 +181,22 @@ def test():
     _test("~a", "(~(a))")
     _test("a -> b", "((~(a)) | (b))")
     _test("a <-> b", "(((~(a)) | (b)) | ((~(b)) | (a)))")
-    _test("a -> b -> c", "(((a) & (~(b))) | (c))")
+    _test("a -> b -> c", "(((a) | (c)) & ((~(b)) | (c)))")
     _test("~(~a)", "(a)")
     _test("~(~(~a))", "(~(a))")
     _test("~(c | d)", "((~(c)) & (~(d)))")
     _test("~(~c | ~d)", "((c) & (d))")
     _test("~(b | ~(c | d))", "((~(b)) & ((c) | (d)))")
-    _test("~(a | ~(b | ~(c | d)))", "((~(a)) & ((b) | ((~(c)) & (~(d)))))")
-    _test("~(a -> ~(b -> ~(c -> d)))", "((a) & ((~(b)) | ((c) & (~(d)))))")
+    _test("~(a | ~(b | ~(c | d)))", "((~(a)) & (((b) | (~(c))) & ((b) | (~(d)))))")
+    _test("~(a -> ~(b -> ~(c -> d)))", "((a) & (((~(b)) | (c)) & ((~(b)) | (~(d)))))")
     _test("~(a -> b)", "((a) & (~(b)))")
     _test("~(a | ~b | (c -> d))", "(((~(a)) & (b)) & ((c) & (~(d))))")
+    _test("(a & b) | (c & d)", "((((a) | (c)) & ((a) | (d))) & (((b) | (c)) & ((b) | (d))))")
+    _test("(a) | (c & d)", "(((a) | (c)) & ((a) | (d)))")
+    _test("(c & d) | a", "(((c) | (a)) & ((d) | (a)))")
+    _test("(a | b) | (c & d)", "((((a) | (b)) | (c)) & (((a) | (b)) | (d)))")
+    _test("((a | b) & (a | c)) | (d & e)",
+          "(((((a) | (b)) | (d)) & (((a) | (b)) | (e))) & ((((a) | (c)) | (d)) & (((a) | (c)) | (e))))")
 
 
 def _test(s, e):
