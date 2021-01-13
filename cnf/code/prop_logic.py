@@ -69,34 +69,51 @@ def to_expression(tree: Tree) -> Expression:
 
 def to_cnf(expression: Expression) -> Expression:
     assert isinstance(expression, Expression)
-    expression = _to_cnf(expression, eliminate_implication)
-    expression = _to_cnf(expression, push_negation_inwards)
-    expression = _to_cnf(expression, distribute_and_over_or)
+    expression = _to_cnf(expression, bottom_up_func=eliminate_implication)
+    expression = _to_cnf(expression, top_down_func=push_negation_inwards)
+    expression = _to_cnf(expression, top_down_func=distribute_and_over_or)
     return expression
 
 
-def _to_cnf(expression: Expression, func) -> Expression:
+def _to_cnf(expression: Expression, top_down_func=None, bottom_up_func=None) -> Expression:
     assert isinstance(expression, Expression)
-    # print(f'in to_cnf {expression.to_str()}')
-    expression = func(expression)
+    # print(f'in _to_cnf {expression.to_str()}')
+    if top_down_func is not None:
+        expression = top_down_func(expression)
+        # print(f'in _to_cnf after top_down_func {expression.to_str()}')
 
     left, right = None, None
     for i in range(len(expression.args)):
         n = expression.args[i]
         if isinstance(n, Expression):
             if i == 0:
-                left = _to_cnf(n, func)
-                # print(f'left {left.to_str()}')
+                left = _to_cnf(n, top_down_func, bottom_up_func)
+                # print(f'_to_cnf before left {left.to_str()}')
+                if bottom_up_func is not None:
+                    left = bottom_up_func(left)
+                # print(f'_to_cnf after left {left.to_str()}')
             elif i == 1:
-                right = _to_cnf(n, func)
-                # print(f'right {right.to_str()}')
+                right = _to_cnf(n, top_down_func, bottom_up_func)
+                # print(f'_to_cnf before right {right.to_str()}')
+                if bottom_up_func is not None:
+                    right = bottom_up_func(right)
+                # print(f'_to_cnf after right {right.to_str()}')
         else:
             return Expression(expression.op, n)
 
     if right is None:
-        return Expression(expression.op, left)
+        # TODO left is none?
+        # print(f'left {left.to_str()}')
+        if bottom_up_func is not None:
+            return bottom_up_func(Expression(expression.op, left))
+        else:
+            return top_down_func(Expression(expression.op, left))
     else:
-        return Expression(expression.op, left, right)
+        # print(f'_to_cnf left {left.to_str()} right {right.to_str()}')
+        if bottom_up_func is not None:
+            return bottom_up_func(Expression(expression.op, left, right))
+        elif top_down_func is not None:
+            return top_down_func(Expression(expression.op, left, right))
 
 
 def eliminate_implication(expression):
@@ -129,36 +146,40 @@ def push_negation_inwards(expression):
                                   Expression(Expression.NEG, child.args[1]))
             elif child.op == Expression.NEG:
                 return child.args[0]
+    # print(f'in push_negation returning {expression.to_str()}')
     return expression
 
 
 def distribute_and_over_or(expression):
     assert isinstance(expression, Expression)
+    # print(f'in distribute_and_over_or {expression.to_str()}')
     if expression.op == Expression.OR:
-        # print(f'in distribute_and_over_or {expression.to_str()}')
         left = expression.args[0]
         right = expression.args[1]
         # (a & b) | (c & d) = (a | c) & (a | d) & (b | c) & (b | d)
+        # print(f'in distribute_and_over_or left {left.to_str()} right {right.to_str()}')
         if left.op == Expression.AND and right.op == Expression.AND:
             l0, l1, r0, r1 = left.args[0], left.args[1], right.args[0], right.args[1]
             return Expression(Expression.AND,
                               Expression(Expression.AND,
-                                         Expression(Expression.OR, l0, r0),
-                                         Expression(Expression.OR, l0, r1)),
+                                         distribute_and_over_or(Expression(Expression.OR, l0, r0)),
+                                         distribute_and_over_or(Expression(Expression.OR, l0, r1))),
                               Expression(Expression.AND,
-                                         Expression(Expression.OR, l1, r0),
-                                         Expression(Expression.OR, l1, r1)))
+                                         distribute_and_over_or(Expression(Expression.OR, l1, r0)),
+                                         distribute_and_over_or(Expression(Expression.OR, l1, r1))))
         # (a = Exp other than AND) | (b & c) = (a | b) & (a | c)
         elif right.op == Expression.AND:
+            # print(f'in distribute_and_over_or right.op = AND {right.to_str()}')
             r0, r1 = right.args[0], right.args[1]
             return Expression(Expression.AND,
-                              Expression(Expression.OR, left, r0),
-                              Expression(Expression.OR, left, r1))
+                              distribute_and_over_or(Expression(Expression.OR, left, r0)),
+                              distribute_and_over_or(Expression(Expression.OR, left, r1)))
         elif left.op == Expression.AND:
+            # print(f'in distribute_and_over_or left.op = AND {left.to_str()}')
             l0, l1 = left.args[0], left.args[1]
             return Expression(Expression.AND,
-                              Expression(Expression.OR, l0, right),
-                              Expression(Expression.OR, l1, right))
+                              distribute_and_over_or(Expression(Expression.OR, l0, right)),
+                              distribute_and_over_or(Expression(Expression.OR, l1, right)))
     return expression
 
 
@@ -197,6 +218,32 @@ def test():
     _test("(a | b) | (c & d)", "((((a) | (b)) | (c)) & (((a) | (b)) | (d)))")
     _test("((a | b) & (a | c)) | (d & e)",
           "(((((a) | (b)) | (d)) & (((a) | (b)) | (e))) & ((((a) | (c)) | (d)) & (((a) | (c)) | (e))))")
+    _test("((a & b) | (c & (d | g)))", "((((a) | (c)) & ((a) | ((d) | (g)))) & (((b) | (c)) & ((b) | ((d) | (g)))))")
+    _test("(c & ((d & e) | g))", "((c) & (((d) | (g)) & ((e) | (g))))")
+    _test("a | (c & (d & e))", "(((a) | (c)) & (((a) | (d)) & ((a) | (e))))")
+    _test("a | (c & (d | g))", "(((a) | (c)) & ((a) | ((d) | (g))))")
+    _test("(c & ((d & e) | g))", "((c) & (((d) | (g)) & ((e) | (g))))")
+    _test("((a & b) | (c & ((d & e) & g)))",
+          "((((a) | (c)) & ((((a) | (d)) & ((a) | (e))) & ((a) | (g)))) & (((b) | (c)) & ((((b) | (d)) & ((b) | (e))) & ((b) | (g)))))")
+    _test("a | (((d & e) | g))", "(((a) | ((d) | (g))) & ((a) | ((e) | (g))))")
+    _test("a | (c & ((d & e) | g))", "(((a) | (c)) & (((a) | ((d) | (g))) & ((a) | ((e) | (g)))))")
+    _test("((a & b) | (c & ((d & e) | g)))",
+          "((((a) | (c)) & (((a) | ((d) | (g))) & ((a) | ((e) | (g))))) & (((b) | (c)) & (((b) | ((d) | (g))) & ((b) | ((e) | (g))))))")
+    _test("((a & b) | (c & (d & e)))",
+          "((((a) | (c)) & (((a) | (d)) & ((a) | (e)))) & (((b) | (c)) & (((b) | (d)) & ((b) | (e)))))")
+    _test("((a & b) | (c & (d | g)))",
+          "((((a) | (c)) & ((a) | ((d) | (g)))) & (((b) | (c)) & ((b) | ((d) | (g)))))")
+    _test("(a | (d | (e & g)))", "(((a) | ((d) | (e))) & ((a) | ((d) | (g))))")
+    _test("(a | ((((d) | (h)) & ((d) | (g))) & (((e) | (h)) & ((e) | (g)))))",
+          "((((a) | ((d) | (h))) & ((a) | ((d) | (g)))) & (((a) | ((e) | (h))) & ((a) | ((e) | (g)))))")
+    _test("(a | ((d & e) | (h & g)))",
+          "((((a) | ((d) | (h))) & ((a) | ((d) | (g)))) & (((a) | ((e) | (h))) & ((a) | ((e) | (g)))))")
+    _test("((a & b) | ((d & e) | (h & g)))",
+          "(((((a) | ((d) | (h))) & ((a) | ((d) | (g)))) & (((a) | ((e) | (h))) & ((a) | ((e) | (g))))) & ((((b) | ((d) | (h))) & ((b) | ((d) | (g)))) & (((b) | ((e) | (h))) & ((b) | ((e) | (g))))))")
+    _test("((a & b) | (c & ((d & e) | (h & g))))",
+          "((((a) | (c)) & ((((a) | ((d) | (h))) & ((a) | ((d) | (g)))) & (((a) | ((e) | (h))) & ((a) | ((e) | (g)))))) & (((b) | (c)) & ((((b) | ((d) | (h))) & ((b) | ((d) | (g)))) & (((b) | ((e) | (h))) & ((b) | ((e) | (g)))))))")
+    _test("((((a & b) | (c & d)) & e) | (((n & g) | (h & i)) & ((j & k) | (l & m))))",
+          "(((((((((a) | (c)) | ((n) | (h))) & (((a) | (c)) | ((n) | (i)))) & ((((a) | (d)) | ((n) | (h))) & (((a) | (d)) | ((n) | (i))))) & (((((a) | (c)) | ((g) | (h))) & (((a) | (c)) | ((g) | (i)))) & ((((a) | (d)) | ((g) | (h))) & (((a) | (d)) | ((g) | (i)))))) & ((((((b) | (c)) | ((n) | (h))) & (((b) | (c)) | ((n) | (i)))) & ((((b) | (d)) | ((n) | (h))) & (((b) | (d)) | ((n) | (i))))) & (((((b) | (c)) | ((g) | (h))) & (((b) | (c)) | ((g) | (i)))) & ((((b) | (d)) | ((g) | (h))) & (((b) | (d)) | ((g) | (i))))))) & (((((((a) | (c)) | ((j) | (l))) & (((a) | (c)) | ((j) | (m)))) & ((((a) | (d)) | ((j) | (l))) & (((a) | (d)) | ((j) | (m))))) & (((((a) | (c)) | ((k) | (l))) & (((a) | (c)) | ((k) | (m)))) & ((((a) | (d)) | ((k) | (l))) & (((a) | (d)) | ((k) | (m)))))) & ((((((b) | (c)) | ((j) | (l))) & (((b) | (c)) | ((j) | (m)))) & ((((b) | (d)) | ((j) | (l))) & (((b) | (d)) | ((j) | (m))))) & (((((b) | (c)) | ((k) | (l))) & (((b) | (c)) | ((k) | (m)))) & ((((b) | (d)) | ((k) | (l))) & (((b) | (d)) | ((k) | (m)))))))) & (((((e) | ((n) | (h))) & ((e) | ((n) | (i)))) & (((e) | ((g) | (h))) & ((e) | ((g) | (i))))) & ((((e) | ((j) | (l))) & ((e) | ((j) | (m)))) & (((e) | ((k) | (l))) & ((e) | ((k) | (m)))))))")
 
 
 def _test(s, e):
