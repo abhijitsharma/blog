@@ -69,51 +69,33 @@ def to_expression(tree: Tree) -> Expression:
 
 def to_cnf(expression: Expression) -> Expression:
     assert isinstance(expression, Expression)
-    expression = _to_cnf(expression, bottom_up_func=eliminate_implication)
-    expression = _to_cnf(expression, top_down_func=push_negation_inwards)
-    expression = _to_cnf(expression, top_down_func=distribute_and_over_or)
+    expression = _to_cnf(expression, eliminate_implication)
+    expression = _to_cnf(expression, push_negation_inwards)
+    expression = _to_cnf(expression, distribute_and_over_or)
     return expression
 
 
-def _to_cnf(expression: Expression, top_down_func=None, bottom_up_func=None) -> Expression:
+def _to_cnf(expression: Expression, func) -> Expression:
     assert isinstance(expression, Expression)
-    # print(f'in _to_cnf {expression.to_str()}')
-    if top_down_func is not None:
-        expression = top_down_func(expression)
-        # print(f'in _to_cnf after top_down_func {expression.to_str()}')
+    assert func is not None
+
+    expression = func(expression)
 
     left, right = None, None
     for i in range(len(expression.args)):
         n = expression.args[i]
         if isinstance(n, Expression):
             if i == 0:
-                left = _to_cnf(n, top_down_func, bottom_up_func)
-                # print(f'_to_cnf before left {left.to_str()}')
-                if bottom_up_func is not None:
-                    left = bottom_up_func(left)
-                # print(f'_to_cnf after left {left.to_str()}')
+                left = _to_cnf(n, func)
             elif i == 1:
-                right = _to_cnf(n, top_down_func, bottom_up_func)
-                # print(f'_to_cnf before right {right.to_str()}')
-                if bottom_up_func is not None:
-                    right = bottom_up_func(right)
-                # print(f'_to_cnf after right {right.to_str()}')
+                right = _to_cnf(n, func)
         else:
             return Expression(expression.op, n)
 
     if right is None:
-        # TODO left is none?
-        # print(f'left {left.to_str()}')
-        if bottom_up_func is not None:
-            return bottom_up_func(Expression(expression.op, left))
-        else:
-            return top_down_func(Expression(expression.op, left))
+        return func(Expression(expression.op, left))
     else:
-        # print(f'_to_cnf left {left.to_str()} right {right.to_str()}')
-        if bottom_up_func is not None:
-            return bottom_up_func(Expression(expression.op, left, right))
-        elif top_down_func is not None:
-            return top_down_func(Expression(expression.op, left, right))
+        return func(Expression(expression.op, left, right))
 
 
 def eliminate_implication(expression):
