@@ -1,16 +1,16 @@
 ?start: iff
 
 ?iff: implication
-    | iff "<->" implication -> iff
+    | implication "<->" iff -> iff
 
 ?implication: or
-    | implication "->" or -> implication
+    | or "->" implication -> implication
 
 ?or: and
-    | or "|" and -> or
+    | and "|" or -> or
 
 ?and: negation
-    | and "&" negation -> and
+    | negation "&" and -> and
 
 ?negation: "~" expression -> neg
     | expression

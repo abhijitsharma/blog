@@ -11,7 +11,7 @@ class Expression:
     ops = {IMPLICATION: '->', IFF: '<->', NEG: '~', AND: '&', OR: '|', VAR: 'var'}
 
     def __init__(self, op, *args):
-        """Op is a string and args are Expression's or literal Strings (var)"""
+        """Op is a string and args are child Expression's or literal Strings (for a var)"""
         self.op = op
         self.args = args
 
@@ -183,11 +183,18 @@ def main():
 
 
 def test():
+    _test("x -> (y -> z)", "(~x | (~y | z))")
+    _test("x | y | z", "(x | (y | z))")
+    _test("x & y & z", "(x & (y & z))")
+    _test("x & y | z", "((x | z) & (y | z))")
+    _test("(~x) -> ((y | z) -> (x | (y | z)))", "((x | (~y | (x | (y | z)))) & (x | (~z | (x | (y | z)))))")
+    _test("~x -> y | z -> x | y | z", "((x | (~y | (x | (y | z)))) & (x | (~z | (x | (y | z)))))")
     _test("a", "a")
     _test("~a", "~a")
     _test("a -> b", "(~a | b)")
     _test("a <-> b", "((~a | b) | (~b | a))")
-    _test("a -> b -> c", "((a | c) & (~b | c))")
+    _test("(a -> b) -> c", "((a | c) & (~b | c))")
+    _test("a -> b -> c", "(~a | (~b | c))")
     _test("~(~a)", "a")
     _test("~(~(~a))", "~a")
     _test("~(c | d)", "(~c & ~d)")
@@ -196,7 +203,8 @@ def test():
     _test("~(a | ~(b | ~(c | d)))", "(~a & ((b | ~c) & (b | ~d)))")
     _test("~(a -> ~(b -> ~(c -> d)))", "(a & ((~b | c) & (~b | ~d)))")
     _test("~(a -> b)", "(a & ~b)")
-    _test("~(a | ~b | (c -> d))", "((~a & b) & (c & ~d))")
+    _test("~((a | ~b) | (c -> d))", "((~a & b) & (c & ~d))")
+    _test("~(a | ~b | (c -> d))", "(~a & (b & (c & ~d)))")
     _test("(a & b) | (c & d)", "(((a | c) & (a | d)) & ((b | c) & (b | d)))")
     _test("a | (c & d)", "((a | c) & (a | d))")
     _test("(c & d) | a", "((c | a) & (d | a))")
@@ -240,7 +248,7 @@ def _test(s, e):
     cnf_expression = to_cnf(expression)
     print(">>>>>>>")
     _s = cnf_expression.to_str()
-    print(f's: "{s}" \ncnf: "{_s}" \nexpected "{e}"')
+    print(f's: "{s}" \nexp: "{expression.to_str()}" "\ncnf: "{_s}" \nexpected "{e}"')
     print(">>>>>>>")
     assert _s == e
 
