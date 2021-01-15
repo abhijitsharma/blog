@@ -49,13 +49,11 @@ class Expression:
 
 def to_expression(tree: Tree) -> Expression:
     assert isinstance(tree, Tree)
-
-    #    print(f'in _transform {tree} children {len(tree.children)}')
     assert len(tree.children) <= 2
+
     left, right = None, None
     for i in range(len(tree.children)):
         n = tree.children[i]
-        #        print(f'type {type(n)}')
         if isinstance(n, Tree):
             if i == 0:
                 left = to_expression(n)
@@ -183,6 +181,10 @@ def main():
 
 
 def test():
+    _test("p | ~(q -> r)", "((p | q) & (p | ~r))")
+    _test("~(p | ~(q -> r))", "(~p & (~q | r))")
+    _test("a | b | c | e -> g", "((~a | g) & ((~b | g) & ((~c | g) & (~e | g))))")
+    _test("a | b | ~c | e -> g", "((~a | g) & ((~b | g) & ((c | g) & (~e | g))))")
     _test("x -> (y -> z)", "(~x | (~y | z))")
     _test("x | y | z", "(x | (y | z))")
     _test("x & y & z", "(x & (y & z))")

@@ -26,17 +26,24 @@ ANTLR grammar for prop logic
 
 ~(a v ~b v (c -> d))
 ~a v b
-a v b  ^ c ^ e -> f
+a | b | c | e -> f
+
+s: "a | b | c | e -> f" 
+exp: "((a | (b | (c | e))) -> f)" "
+
+s: "a | b | ~c | e -> f" 
+exp: "((a | (b | (~c | e))) -> f)" "
 
 precedence
 ~, ^, v, ->, <->
 
+Oper precedence + right associative
+s: "~x -> y | z -> x | y | z" 
+exp: "(~x -> ((y | z) -> (x | (y | z))))" "
 
 TODO
 
 - XOR not implemented
-- double negation
-- repeated
 
 
 
@@ -72,24 +79,6 @@ https://ocw.mit.edu/courses/health-sciences-and-technology/hst-947-medical-artif
 
 https://leanprover.github.io/logic_and_proof/first_order_logic_in_lean.html
 
-Misc
-
-Zero trust
-Spiffe Spire
-mseg
-AWS security - IAM, Keys, encrypt
-
-Code snippets
-
-@v_args(inline=True)  # Affects the signatures of the methods
-class ConvertToExpression(Transformer):
-    def __init__(self):
-        super().__init__()
-
-    def implication(self, left, right):
-        print(f'-> left : {left} : right : {right}')
-        return Expression('->', left.data, right.data)
-
 
 ~(a | ~(b | ~(c | d)))
 ~(a | ~(b | (~c & ~d)))
@@ -116,7 +105,27 @@ class ConvertToExpression(Transformer):
 ((~(b)) & ((c) | (d)))
 
 
-
-
 ~~~
+a | (((d & e) | g))
+
+(d | g) & 
+
+or
+	a
+	or
+		and
+			d
+			e
+		g
+
+a | (((d & e) | g))
+
+a | ((d | g) & (e | g))
+
+(a | d | g) & (a | e | g)
+~~~
+
+Oper precedence + right associative
+s: "~x -> y | z -> x | y | z" 
+exp: "(~x -> ((y | z) -> (x | (y | z))))" "
 
