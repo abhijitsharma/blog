@@ -28,10 +28,30 @@
 \begin{document}
 CNF conversion
 \\
+\begin{enumerate}
+\item $p \vee \neg (q \implies r) \text{ : the boolean formula }$
 \\
+\item $p \vee \neg (\neg q \vee r) \text{ : by the equivalence to (1) } (a \implies b) \equiv (\neg a \vee b)$
+\\
+\item $p \vee (\neg \neg q \wedge \neg r) \text{ : by De Morgan's law to (2) } \neg (a \vee b) \equiv (\neg a \wedge \neg b)$
+\\
+\item $p \vee (q \wedge \neg r) \text{ : by  De Morgan's law to (3) } \neg \neg a \equiv a$
+\\
+\item $(p \vee q) \wedge (p \vee \neg r) \text{ : by distribution of } \wedge \text{over} \vee \text{to (4) } a \vee (b \wedge c) \equiv (a \vee b) \wedge (a \vee c) $
+\\
+\item $(p \vee q) \wedge (p \vee \neg r)$ is in CNF
+\end{enumerate}
 $
+\\
+\\
 \phi \equiv =
+\\
+\\
+\\
+\\
 \iffalse
+
+case 1
 (a v b) -> (c -> d)
 (a v b) -> (~c v d)
 ~(a v b) v (~c v d)
@@ -39,7 +59,31 @@ $
 (~c v d) v (~a & ~b)
 ((~c v d) v ~a) & ((~c v d) v ~b)
 (~a v ~c v d) & (~b v ~c v d)
+
+case 2
+p | ~(q -> r)
+p ∨ ¬(~q | r)
+p ∨ (q & ~r)
+(p ∨ q) & (p ∨ ~r)
+
 \fi
+\\
+p \vee \neg (q \implies r) \text{ by the equivalence } (a \implies b) \equiv (\neg a \vee b)
+\\
+\\
+p \vee \neg (\neg q \vee r) \text{ by De Morgan's law } \neg (a \vee b) \equiv (\neg a \wedge \neg b)
+\\
+\\
+p \vee (\neg \neg q \wedge \neg r) \text{ by De Morgan's law } \neg \neg a \equiv a
+\\
+\\
+p \vee (q \wedge \neg r) \text{ by distributing and over or } a \vee (b \wedge c) \equiv (a \vee b) \wedge (a \vee c) 
+\\
+\\
+(p \vee q) \wedge (p \vee \neg r) \text{ CNF}
+\\
+\\
+\\
 \\
 \phi = (a \vee b) \implies (c \implies d)
 \\
