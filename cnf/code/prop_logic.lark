@@ -18,8 +18,8 @@
 ?expression: "(" iff ")"
     | atom
 
-?atom: "T" -> true
-    | "F" -> false
+?atom: "True" -> true
+    | "False" -> false
     | variable -> var
 
 ?variable: ("a".."z")+

@@ -7,8 +7,8 @@ def load_grammar():
 
 
 class Expression:
-    IMPLICATION, IFF, NEG, AND, OR, VAR = 'implication', 'iff', 'neg', 'and', 'or', 'var'
-    ops = {IMPLICATION: '->', IFF: '<->', NEG: '~', AND: '&', OR: '|', VAR: 'var'}
+    IMPLICATION, IFF, NEG, AND, OR, VAR, TRUEVAL = 'implication', 'iff', 'neg', 'and', 'or', 'var', "trueval"
+    ops = {IMPLICATION: '->', IFF: '<->', NEG: '~', AND: '&', OR: '|', VAR: 'var', TRUEVAL: 'trueval'}
 
     def __init__(self, op, *args):
         """Op is a string and args are child Expression's or literal Strings (for a var)"""
@@ -51,8 +51,10 @@ def to_expression(tree: Tree) -> Expression:
     assert isinstance(tree, Tree)
     assert len(tree.children) <= 2
 
+    count = len(tree.children)
+
     left, right = None, None
-    for i in range(len(tree.children)):
+    for i in range(count):
         n = tree.children[i]
         if isinstance(n, Tree):
             if i == 0:
@@ -62,14 +64,19 @@ def to_expression(tree: Tree) -> Expression:
         else:
             return Expression(tree.data, n.value)
 
-    if right is None:
+    if right is None and left is not None:
         return Expression(tree.data, left)
+    elif count == 0 and (tree.data == 'true' or tree.data == 'false'):
+        val = tree.data == 'true'
+        return Expression(Expression.TRUEVAL, val)
     else:
         return Expression(tree.data, left, right)
 
 
 def to_cnf(expression: Expression) -> Expression:
     assert isinstance(expression, Expression)
+    # expression = _to_cnf(expression, eliminate_negation)
+    expression = _to_cnf(expression, eliminate_trueval)
     expression = _to_cnf(expression, eliminate_implication)
     expression = _to_cnf(expression, push_negation_inwards)
     expression = _to_cnf(expression, distribute_and_over_or)
@@ -97,6 +104,63 @@ def _to_cnf(expression: Expression, func) -> Expression:
         return func(Expression(expression.op, left))
     else:
         return func(Expression(expression.op, left, right))
+
+
+def eliminate_trueval(expression):
+    assert isinstance(expression, Expression)
+    # (T | e) = T, (F | e) = e
+    if expression.op == Expression.OR:
+        left = expression.args[0]
+        right = expression.args[1]
+        if left.op == Expression.TRUEVAL and right.op == Expression.TRUEVAL:
+            return Expression(Expression.TRUEVAL, left.args[0] | right.args[0])
+        elif left.op == Expression.TRUEVAL:
+            if left.args[0]:
+                return Expression(Expression.TRUEVAL, True)
+            else:
+                return right
+        elif right.op == Expression.TRUEVAL:
+            if right.args[0]:
+                return Expression(Expression.TRUEVAL, True)
+            else:
+                return left
+    # (T & e) = e, (F & e) = F
+    elif expression.op == Expression.AND:
+        left = expression.args[0]
+        right = expression.args[1]
+        if left.op == Expression.TRUEVAL and right.op == Expression.TRUEVAL:
+            return Expression(Expression.TRUEVAL, left.args[0] & right.args[0])
+        elif left.op == Expression.TRUEVAL:
+            if left.args[0]:
+                return right
+            else:
+                return Expression(Expression.TRUEVAL, False)
+        elif right.op == Expression.TRUEVAL:
+            if right.args[0]:
+                return left
+            else:
+                return Expression(Expression.TRUEVAL, False)
+    return expression
+
+
+# a & ~a = False a | ~a = True
+def eliminate_negation(expression):
+    assert isinstance(expression, Expression)
+    if expression.op == Expression.OR:
+        left = expression.args[0]
+        right = expression.args[1]
+        if left.op == Expression.VAR and right.op == Expression.NEG and right.args[0].op == Expression.VAR:
+            return Expression(Expression.TRUEVAL, True)
+        elif right.op == Expression.VAR and left.op == Expression.NEG and left.args[0].op == Expression.VAR:
+            return Expression(Expression.TRUEVAL, True)
+    elif expression.op == Expression.AND:
+        left = expression.args[0]
+        right = expression.args[1]
+        if left.op == Expression.VAR and right.op == Expression.NEG and right.args[0].op == Expression.VAR:
+            return Expression(Expression.TRUEVAL, False)
+        elif right.op == Expression.VAR and left.op == Expression.NEG and left.args[0].op == Expression.VAR:
+            return Expression(Expression.TRUEVAL, False)
+    return expression
 
 
 def eliminate_implication(expression):
@@ -181,6 +245,7 @@ def main():
 
 
 def test():
+    _test("p | q | r -> s", "((~p | s) & ((~q | s) & (~r | s)))")
     _test("p | ~(q -> r)", "((p | q) & (p | ~r))")
     _test("~(p | ~(q -> r))", "(~p & (~q | r))")
     _test("a | b | c | e -> g", "((~a | g) & ((~b | g) & ((~c | g) & (~e | g))))")
@@ -243,6 +308,17 @@ def test():
           "(((a | c) & (((a | (d | h)) & (a | (d | g))) & ((a | (e | h)) & (a | (e | g))))) & ((b | c) & (((b | (d | h)) & (b | (d | g))) & ((b | (e | h)) & (b | (e | g))))))")
     _test("((((a & b) | (c & d)) & e) | (((n & g) | (h & i)) & ((j & k) | (l & m))))",
           "((((((((a | c) | (n | h)) & ((a | c) | (n | i))) & (((a | d) | (n | h)) & ((a | d) | (n | i)))) & ((((a | c) | (g | h)) & ((a | c) | (g | i))) & (((a | d) | (g | h)) & ((a | d) | (g | i))))) & (((((b | c) | (n | h)) & ((b | c) | (n | i))) & (((b | d) | (n | h)) & ((b | d) | (n | i)))) & ((((b | c) | (g | h)) & ((b | c) | (g | i))) & (((b | d) | (g | h)) & ((b | d) | (g | i)))))) & ((((((a | c) | (j | l)) & ((a | c) | (j | m))) & (((a | d) | (j | l)) & ((a | d) | (j | m)))) & ((((a | c) | (k | l)) & ((a | c) | (k | m))) & (((a | d) | (k | l)) & ((a | d) | (k | m))))) & (((((b | c) | (j | l)) & ((b | c) | (j | m))) & (((b | d) | (j | l)) & ((b | d) | (j | m)))) & ((((b | c) | (k | l)) & ((b | c) | (k | m))) & (((b | d) | (k | l)) & ((b | d) | (k | m))))))) & ((((e | (n | h)) & (e | (n | i))) & ((e | (g | h)) & (e | (g | i)))) & (((e | (j | l)) & (e | (j | m))) & ((e | (k | l)) & (e | (k | m))))))")
+    # b xor c = ((b ∧ ¬c) | ( ¬b ∧ c)) - XOR explosion
+    # (a xor (b xor c)) = (a ∧ ¬((b ∧ ¬c) | ( ¬b ∧ c))) | (¬a ∧ ((b ∧ ¬c) | ( ¬b ∧ c)))
+    # _test("(a & ~((b & ~c) | ( ~b & c))) | (~a & ((b & ~c) | ( ~b & c)))",
+    #       "(((a | ~a) & (((a | (b | ~b)) & (a | (b | c))) & ((a | (~c | ~b)) & (a | (~c | c))))) & ((((~b | c) | ~a) & ((b | ~c) | ~a)) & (((((~b | c) | (b | ~b)) & ((~b | c) | (b | c))) & (((~b | c) | (~c | ~b)) & ((~b | c) | (~c | c)))) & ((((b | ~c) | (b | ~b)) & ((b | ~c) | (b | c))) & (((b | ~c) | (~c | ~b)) & ((b | ~c) | (~c | c)))))))")
+    _test("((a & b) | True) | (a & ~b)", "True")
+    _test("a | True", "True")
+    _test("True | True", "True")
+    _test("False | True", "True")
+    _test("False | False", "False")
+    # _test("a | ~a", "True")
+    # _test("a & ~a", "False")
 
 
 def _test(s, e):
