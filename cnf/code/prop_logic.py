@@ -75,11 +75,11 @@ def to_expression(tree: Tree) -> Expression:
 
 def to_cnf(expression: Expression) -> Expression:
     assert isinstance(expression, Expression)
-    # expression = _to_cnf(expression, eliminate_negation)
-    expression = _to_cnf(expression, eliminate_trueval)
     expression = _to_cnf(expression, eliminate_implication)
     expression = _to_cnf(expression, push_negation_inwards)
     expression = _to_cnf(expression, distribute_and_over_or)
+    expression = _to_cnf(expression, eliminate_negation)
+    expression = _to_cnf(expression, eliminate_trueval)
     return expression
 
 
@@ -150,16 +150,20 @@ def eliminate_negation(expression):
         left = expression.args[0]
         right = expression.args[1]
         if left.op == Expression.VAR and right.op == Expression.NEG and right.args[0].op == Expression.VAR:
-            return Expression(Expression.TRUEVAL, True)
+            if left.args[0] == right.args[0].args[0]:
+                return Expression(Expression.TRUEVAL, True)
         elif right.op == Expression.VAR and left.op == Expression.NEG and left.args[0].op == Expression.VAR:
-            return Expression(Expression.TRUEVAL, True)
+            if right.args[0] == left.args[0].args[0]:
+                return Expression(Expression.TRUEVAL, True)
     elif expression.op == Expression.AND:
         left = expression.args[0]
         right = expression.args[1]
         if left.op == Expression.VAR and right.op == Expression.NEG and right.args[0].op == Expression.VAR:
-            return Expression(Expression.TRUEVAL, False)
+            if left.args[0] == right.args[0].args[0]:
+                return Expression(Expression.TRUEVAL, False)
         elif right.op == Expression.VAR and left.op == Expression.NEG and left.args[0].op == Expression.VAR:
-            return Expression(Expression.TRUEVAL, False)
+            if right.args[0] == left.args[0].args[0]:
+                return Expression(Expression.TRUEVAL, False)
     return expression
 
 
@@ -245,6 +249,8 @@ def main():
 
 
 def test():
+    _test("a | ~a", "True")
+    _test("a & ~a", "False")
     _test("p | q | r -> s", "((~p | s) & ((~q | s) & (~r | s)))")
     _test("p | ~(q -> r)", "((p | q) & (p | ~r))")
     _test("~(p | ~(q -> r))", "(~p & (~q | r))")
@@ -308,17 +314,22 @@ def test():
           "(((a | c) & (((a | (d | h)) & (a | (d | g))) & ((a | (e | h)) & (a | (e | g))))) & ((b | c) & (((b | (d | h)) & (b | (d | g))) & ((b | (e | h)) & (b | (e | g))))))")
     _test("((((a & b) | (c & d)) & e) | (((n & g) | (h & i)) & ((j & k) | (l & m))))",
           "((((((((a | c) | (n | h)) & ((a | c) | (n | i))) & (((a | d) | (n | h)) & ((a | d) | (n | i)))) & ((((a | c) | (g | h)) & ((a | c) | (g | i))) & (((a | d) | (g | h)) & ((a | d) | (g | i))))) & (((((b | c) | (n | h)) & ((b | c) | (n | i))) & (((b | d) | (n | h)) & ((b | d) | (n | i)))) & ((((b | c) | (g | h)) & ((b | c) | (g | i))) & (((b | d) | (g | h)) & ((b | d) | (g | i)))))) & ((((((a | c) | (j | l)) & ((a | c) | (j | m))) & (((a | d) | (j | l)) & ((a | d) | (j | m)))) & ((((a | c) | (k | l)) & ((a | c) | (k | m))) & (((a | d) | (k | l)) & ((a | d) | (k | m))))) & (((((b | c) | (j | l)) & ((b | c) | (j | m))) & (((b | d) | (j | l)) & ((b | d) | (j | m)))) & ((((b | c) | (k | l)) & ((b | c) | (k | m))) & (((b | d) | (k | l)) & ((b | d) | (k | m))))))) & ((((e | (n | h)) & (e | (n | i))) & ((e | (g | h)) & (e | (g | i)))) & (((e | (j | l)) & (e | (j | m))) & ((e | (k | l)) & (e | (k | m))))))")
-    # b xor c = ((b ∧ ¬c) | ( ¬b ∧ c)) - XOR explosion
-    # (a xor (b xor c)) = (a ∧ ¬((b ∧ ¬c) | ( ¬b ∧ c))) | (¬a ∧ ((b ∧ ¬c) | ( ¬b ∧ c)))
-    # _test("(a & ~((b & ~c) | ( ~b & c))) | (~a & ((b & ~c) | ( ~b & c)))",
-    #       "(((a | ~a) & (((a | (b | ~b)) & (a | (b | c))) & ((a | (~c | ~b)) & (a | (~c | c))))) & ((((~b | c) | ~a) & ((b | ~c) | ~a)) & (((((~b | c) | (b | ~b)) & ((~b | c) | (b | c))) & (((~b | c) | (~c | ~b)) & ((~b | c) | (~c | c)))) & ((((b | ~c) | (b | ~b)) & ((b | ~c) | (b | c))) & (((b | ~c) | (~c | ~b)) & ((b | ~c) | (~c | c)))))))")
     _test("((a & b) | True) | (a & ~b)", "True")
     _test("a | True", "True")
     _test("True | True", "True")
     _test("False | True", "True")
     _test("False | False", "False")
-    # _test("a | ~a", "True")
-    # _test("a & ~a", "False")
+    _test("((~b | b) | (c | c))", "True")
+    # TODO FIX
+    # _test("c | c", "c")
+    # Reorder to ~b | b | c | c
+    # _test("((~b | c) | (b | c))", "")
+    # _test("((~b | c) | (b | c))", "")
+    # b xor c = ((b ∧ ¬c) | ( ¬b ∧ c)) - XOR explosion
+    # (a xor (b xor c)) = (a ∧ ¬((b ∧ ¬c) | ( ¬b ∧ c))) | (¬a ∧ ((b ∧ ¬c) | ( ¬b ∧ c)))
+    # Should eventually be simplified to (C ∨ B ∨ A) ∧ (¬B ∨ ¬C ∨ A) ∧ (¬A ∨ ¬B ∨ C) ∧ (¬A ∨ B ∨ ¬C)
+    _test("(a & ~((b & ~c) | ( ~b & c))) | (~a & ((b & ~c) | ( ~b & c)))",
+          "(((a | (b | c)) & (a | (~c | ~b))) & ((((~b | c) | ~a) & ((b | ~c) | ~a)) & ((((~b | c) | (b | c)) & ((~b | c) | (~c | ~b))) & (((b | ~c) | (b | c)) & ((b | ~c) | (~c | ~b))))))")
 
 
 def _test(s, e):
