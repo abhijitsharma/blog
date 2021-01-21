@@ -18,6 +18,24 @@ class Expression:
     def is_unary(self):
         return len(self.args) == 1
 
+    def _is_atom(self, types):
+        return self.op in types
+
+    def is_atom(self):
+        return self._is_atom({Expression.VAR, Expression.TRUEVAL})
+
+    def _is_negated_atom(self, types):
+        return self.op == Expression.NEG and self.args[0].op in types
+
+    def is_negated_atom(self):
+        return self._is_negated_atom({Expression.VAR, Expression.TRUEVAL})
+
+    def _is_literal(self, types):
+        return self._is_atom(types) or self._is_negated_atom(types)
+
+    def is_literal(self):
+        return self._is_literal({Expression.VAR, Expression.TRUEVAL})
+
     @property
     def _to_str(self):
         l = []
@@ -78,8 +96,8 @@ def to_cnf(expression: Expression) -> Expression:
     expression = _to_cnf(expression, eliminate_implication)
     expression = _to_cnf(expression, push_negation_inwards)
     expression = _to_cnf(expression, distribute_and_over_or)
-    expression = _to_cnf(expression, eliminate_negation)
-    expression = _to_cnf(expression, eliminate_trueval)
+    expression = _to_cnf(expression, eliminate_same_var_negation)
+    expression = _to_cnf(expression, eliminate_identity)
     return expression
 
 
@@ -106,7 +124,7 @@ def _to_cnf(expression: Expression, func) -> Expression:
         return func(Expression(expression.op, left, right))
 
 
-def eliminate_trueval(expression):
+def eliminate_identity(expression):
     assert isinstance(expression, Expression)
     # (T | e) = T, (F | e) = e
     if expression.op == Expression.OR:
@@ -143,27 +161,52 @@ def eliminate_trueval(expression):
     return expression
 
 
+def collect_vars(expression, var_s, neg_var_s):
+    if expression.is_literal():
+        if expression.is_atom():
+            var_s.add(expression.args[0])
+        elif expression.is_negated_atom():
+            neg_var_s.add(expression.args[0].args[0])
+        return
+
+    for i in range(len(expression.args)):
+        n = expression.args[i]
+        if isinstance(n, Expression):
+            if i == 0:
+                collect_vars(n, var_s, neg_var_s)
+            elif i == 1:
+                collect_vars(n, var_s, neg_var_s)
+
+
+def is_tree_of_op(expression, op):
+    if expression.op != op:
+        return False
+
+    for i in range(len(expression.args)):
+        n = expression.args[i]
+        if isinstance(n, Expression):
+            if n.is_literal():
+                continue
+            if i == 0:
+                return is_tree_of_op(n, op)
+            elif i == 1:
+                return is_tree_of_op(n, op)
+
+    return True
+
+
 # a & ~a = False a | ~a = True
-def eliminate_negation(expression):
+def eliminate_same_var_negation(expression):
     assert isinstance(expression, Expression)
-    if expression.op == Expression.OR:
-        left = expression.args[0]
-        right = expression.args[1]
-        if left.op == Expression.VAR and right.op == Expression.NEG and right.args[0].op == Expression.VAR:
-            if left.args[0] == right.args[0].args[0]:
-                return Expression(Expression.TRUEVAL, True)
-        elif right.op == Expression.VAR and left.op == Expression.NEG and left.args[0].op == Expression.VAR:
-            if right.args[0] == left.args[0].args[0]:
-                return Expression(Expression.TRUEVAL, True)
-    elif expression.op == Expression.AND:
-        left = expression.args[0]
-        right = expression.args[1]
-        if left.op == Expression.VAR and right.op == Expression.NEG and right.args[0].op == Expression.VAR:
-            if left.args[0] == right.args[0].args[0]:
-                return Expression(Expression.TRUEVAL, False)
-        elif right.op == Expression.VAR and left.op == Expression.NEG and left.args[0].op == Expression.VAR:
-            if right.args[0] == left.args[0].args[0]:
-                return Expression(Expression.TRUEVAL, False)
+    var_s, neg_var_s = set(), set()
+    if is_tree_of_op(expression, Expression.OR):
+        collect_vars(expression, var_s, neg_var_s)
+        if len(var_s.intersection(neg_var_s)) != 0:
+            return Expression(Expression.TRUEVAL, True)
+    elif is_tree_of_op(expression, Expression.AND):
+        collect_vars(expression, var_s, neg_var_s)
+        if len(var_s.intersection(neg_var_s)) != 0:
+            return Expression(Expression.TRUEVAL, False)
     return expression
 
 
@@ -173,7 +216,7 @@ def eliminate_implication(expression):
         return Expression(Expression.OR,
                           Expression(Expression.NEG, expression.args[0]), expression.args[1])
     elif expression.op == Expression.IFF:
-        return Expression(Expression.OR,
+        return Expression(Expression.AND,
                           Expression(Expression.OR,
                                      Expression(Expression.NEG, expression.args[0]), expression.args[1]),
                           Expression(Expression.OR,
@@ -195,6 +238,8 @@ def push_negation_inwards(expression):
                 return Expression(Expression.OR,
                                   Expression(Expression.NEG, child.args[0]),
                                   Expression(Expression.NEG, child.args[1]))
+            elif child.op == Expression.TRUEVAL:
+                return Expression(Expression.TRUEVAL, not child.args[0])
             elif child.op == Expression.NEG:
                 return child.args[0]
     # print(f'in push_negation returning {expression.to_str()}')
@@ -260,12 +305,12 @@ def test():
     _test("x | y | z", "(x | (y | z))")
     _test("x & y & z", "(x & (y & z))")
     _test("x & y | z", "((x | z) & (y | z))")
-    _test("(~x) -> ((y | z) -> (x | (y | z)))", "((x | (~y | (x | (y | z)))) & (x | (~z | (x | (y | z)))))")
-    _test("~x -> y | z -> x | y | z", "((x | (~y | (x | (y | z)))) & (x | (~z | (x | (y | z)))))")
+    _test("(~x) -> ((y | z) -> (x | (y | z)))", "True")
+    _test("~x -> y | z -> x | y | z", "True")
     _test("a", "a")
     _test("~a", "~a")
     _test("a -> b", "(~a | b)")
-    _test("a <-> b", "((~a | b) | (~b | a))")
+    _test("a <-> b", "((~a | b) & (~b | a))")
     _test("(a -> b) -> c", "((a | c) & (~b | c))")
     _test("a -> b -> c", "(~a | (~b | c))")
     _test("~(~a)", "a")
@@ -314,22 +359,55 @@ def test():
           "(((a | c) & (((a | (d | h)) & (a | (d | g))) & ((a | (e | h)) & (a | (e | g))))) & ((b | c) & (((b | (d | h)) & (b | (d | g))) & ((b | (e | h)) & (b | (e | g))))))")
     _test("((((a & b) | (c & d)) & e) | (((n & g) | (h & i)) & ((j & k) | (l & m))))",
           "((((((((a | c) | (n | h)) & ((a | c) | (n | i))) & (((a | d) | (n | h)) & ((a | d) | (n | i)))) & ((((a | c) | (g | h)) & ((a | c) | (g | i))) & (((a | d) | (g | h)) & ((a | d) | (g | i))))) & (((((b | c) | (n | h)) & ((b | c) | (n | i))) & (((b | d) | (n | h)) & ((b | d) | (n | i)))) & ((((b | c) | (g | h)) & ((b | c) | (g | i))) & (((b | d) | (g | h)) & ((b | d) | (g | i)))))) & ((((((a | c) | (j | l)) & ((a | c) | (j | m))) & (((a | d) | (j | l)) & ((a | d) | (j | m)))) & ((((a | c) | (k | l)) & ((a | c) | (k | m))) & (((a | d) | (k | l)) & ((a | d) | (k | m))))) & (((((b | c) | (j | l)) & ((b | c) | (j | m))) & (((b | d) | (j | l)) & ((b | d) | (j | m)))) & ((((b | c) | (k | l)) & ((b | c) | (k | m))) & (((b | d) | (k | l)) & ((b | d) | (k | m))))))) & ((((e | (n | h)) & (e | (n | i))) & ((e | (g | h)) & (e | (g | i)))) & (((e | (j | l)) & (e | (j | m))) & ((e | (k | l)) & (e | (k | m))))))")
+    _test("(((a | True) & b) | True)", "True")
     _test("((a & b) | True) | (a & ~b)", "True")
     _test("a | True", "True")
     _test("True | True", "True")
     _test("False | True", "True")
     _test("False | False", "False")
     _test("((~b | b) | (c | c))", "True")
-    # TODO FIX
-    # _test("c | c", "c")
-    # Reorder to ~b | b | c | c
-    # _test("((~b | c) | (b | c))", "")
-    # _test("((~b | c) | (b | c))", "")
+    _test("((~b | c) | (d | (e | b)))", "True")
+    _test("~True", "False")
+    _test("~False", "True")
+    _test("~(~(~False))", "True")
+    _test("~(~False)", "False")
+    _test("((a & b) | ~(~True)) | (a & ~b)", "True")
+    _test("a | (b | ~a)", "True")
+    _test("((~b | c) | (b | c))", "True")
     # b xor c = ((b ∧ ¬c) | ( ¬b ∧ c)) - XOR explosion
     # (a xor (b xor c)) = (a ∧ ¬((b ∧ ¬c) | ( ¬b ∧ c))) | (¬a ∧ ((b ∧ ¬c) | ( ¬b ∧ c)))
-    # Should eventually be simplified to (C ∨ B ∨ A) ∧ (¬B ∨ ¬C ∨ A) ∧ (¬A ∨ ¬B ∨ C) ∧ (¬A ∨ B ∨ ¬C)
     _test("(a & ~((b & ~c) | ( ~b & c))) | (~a & ((b & ~c) | ( ~b & c)))",
-          "(((a | (b | c)) & (a | (~c | ~b))) & ((((~b | c) | ~a) & ((b | ~c) | ~a)) & ((((~b | c) | (b | c)) & ((~b | c) | (~c | ~b))) & (((b | ~c) | (b | c)) & ((b | ~c) | (~c | ~b))))))")
+          "(((a | (b | c)) & (a | (~c | ~b))) & (((~b | c) | ~a) & ((b | ~c) | ~a)))")
+
+    _test_is_tree_op("a", Expression.OR, False)
+    _test_is_tree_op("a | (b | ~c)", Expression.OR, True)
+    _test_is_tree_op("a & (b & ~c)", Expression.AND, True)
+    _test_is_tree_op("a | (b & ~c)", Expression.OR, False)
+    _test_collect_vars("a | (b | ~c)", {'a', 'b'}, {'c'})
+    _test_collect_vars("a | (b | ~a)", {'a', 'b'}, {'a'})
+    _test_collect_vars("True | (b | ~True)", {True, 'b'}, {True})
+    # TODO FIX
+    # _test("c | c", "c")
+
+
+def _test_is_tree_op(s, op, e):
+    expression = to_expression(to_logic_tree(s))
+    print(">>>>>>>")
+    val = is_tree_of_op(expression, op)
+    print(f's: "{s}" \nexp: "{expression.to_str()}" \nval: "{val}" \nexpected "{e}"')
+    print(">>>>>>>")
+    assert val == e
+
+
+def _test_collect_vars(s, e_vars, e_neg_vars):
+    expression = to_expression(to_logic_tree(s))
+    print(">>>>>>>")
+    var_s, neg_var_s = set(), set()
+    collect_vars(expression, var_s, neg_var_s)
+    print(f's: "{s}" \nexp: "{expression.to_str()}" \nvars: "{var_s}" \nnegated vars: "{neg_var_s}"')
+    print(">>>>>>>")
+    assert var_s == e_vars
+    assert neg_var_s == e_neg_vars
 
 
 def _test(s, e):
@@ -337,13 +415,9 @@ def _test(s, e):
     cnf_expression = to_cnf(expression)
     print(">>>>>>>")
     _s = cnf_expression.to_str()
-    print(f's: "{s}" \nexp: "{expression.to_str()}" "\ncnf: "{_s}" \nexpected "{e}"')
+    print(f's: "{s}" \nexp: "{expression.to_str()}" \ncnf: "{_s}" \nexpected "{e}"')
     print(">>>>>>>")
     assert _s == e
-
-
-# TODO fix T, F
-# print(prop_logic_tree("a & b | T").pretty())
 
 
 if __name__ == '__main__':
