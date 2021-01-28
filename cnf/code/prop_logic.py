@@ -378,6 +378,10 @@ def test():
     # (a xor (b xor c)) = (a ∧ ¬((b ∧ ¬c) | ( ¬b ∧ c))) | (¬a ∧ ((b ∧ ¬c) | ( ¬b ∧ c)))
     _test("(a & ~((b & ~c) | ( ~b & c))) | (~a & ((b & ~c) | ( ~b & c)))",
           "(((a | (b | c)) & (a | (~c | ~b))) & (((~b | c) | ~a) & ((b | ~c) | ~a)))")
+    _test("(p -> q) -> (~q -> ~p)", "True")
+    _test("(p -> q) -> (~p | q)", "True")
+    # TODO improvement p |...|p = p result below should be p | ~q
+    _test("~p & q -> p & (r -> q)", "((p | ~q) | p)")
 
     _test_is_tree_op("a", Expression.OR, False)
     _test_is_tree_op("a | (b | ~c)", Expression.OR, True)

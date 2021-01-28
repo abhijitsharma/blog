@@ -33,6 +33,14 @@ Grammars for Propositional Logic
 https://www.youtube.com/watch?v=2mF471Tn27Q
 
 https://www.ifi.uzh.ch/en/ailab/teaching/formalmethods2013.html
+http://aima.cs.berkeley.edu/python/logic.html
+http://web.stanford.edu/class/archive/cs/cs103/cs103.1184/
+http://www.decision-procedures.org/slides/
+
+https://ozanerdem.github.io/jekyll/update/2019/11/17/representation-in-sat.html
+https://homes.cs.washington.edu/~emina/blog/2017-06-23-a-primer-on-sat.html#propositional-logic
+https://ermongroup.github.io/cs323-notes/logic/representation/
+https://www.cs.columbia.edu/~rgu/courses/e6998/fall2018/Lecture1.html
 ANTLR grammar for prop logic
 
 
