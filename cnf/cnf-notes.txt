@@ -41,6 +41,15 @@ https://ozanerdem.github.io/jekyll/update/2019/11/17/representation-in-sat.html
 https://homes.cs.washington.edu/~emina/blog/2017-06-23-a-primer-on-sat.html#propositional-logic
 https://ermongroup.github.io/cs323-notes/logic/representation/
 https://www.cs.columbia.edu/~rgu/courses/e6998/fall2018/Lecture1.html
+
+https://homes.cs.washington.edu/~emina/blog/2017-06-23-a-primer-on-sat.html#propositional-logic
+https://ozanerdem.github.io/jekyll/update/2019/11/17/representation-in-sat.html
+http://www.cs.toronto.edu/~fbacchus/csc2512/
+
+http://www.cs.toronto.edu/~fbacchus/csc2512/
+http://www.cs.toronto.edu/~fbacchus/csc2512/Assignments/Bittner2019_Chapter_SATEncodingsOfTheAt-Most-KCons.pdf
+http://www.cs.toronto.edu/~fbacchus/csc2512/Assignments/Bailleux-Boufkhad2003_Chapter_EfficientCNFEncodingOfBooleanC.pdf
+
 ANTLR grammar for prop logic
 
 
@@ -158,4 +167,8 @@ a | ((d | g) & (e | g))
 Oper precedence + right associative
 s: "~x -> y | z -> x | y | z" 
 exp: "(~x -> ((y | z) -> (x | (y | z))))" "
+
+https://gist.github.com/abhijitsharma/8840feca281e9e6fabd270d739835cc1#file-_to_cnf-py
+
+<script src="https://gist.github.com/abhijitsharma/8840feca281e9e6fabd270d739835cc1.js#file-_to_cnf-py"></script>
 
