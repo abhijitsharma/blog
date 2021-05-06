@@ -27,8 +27,9 @@ def rotate(gears, gear_index, clockwise, by):
     print("Moving right")
     for i in range(gear_index + 1, len(gears)):
         g = gears[i]
-        print(f'Gear: {i} Key: {g.key} Rotating clockwise: {_clockwise} By: {by}')
+        prevKey = g.key + 1
         g.rotate(_clockwise, by)
+        print(f'Gear: {i} Prev Key: {prevKey} Key: {g.key + 1} Rotated clockwise: {_clockwise} By: {by}')
         # print_gears(gears, "")
         _clockwise = not _clockwise
 
@@ -37,8 +38,9 @@ def rotate(gears, gear_index, clockwise, by):
     print("Moving left")
     for i in range(gear_index - 1, -1, -1):
         g = gears[i]
-        print(f'Gear: {i} Key: {g.key} Rotating clockwise: {_clockwise} By: {by}')
+        prevKey = g.key + 1
         g.rotate(_clockwise, by)
+        print(f'Gear: {i} Prev Key: {prevKey} Key: {g.key + 1} Rotated clockwise: {_clockwise} By: {by}')
         # print_gears(gears, "")
         _clockwise = not _clockwise
     print('--------------------------------------------------')
