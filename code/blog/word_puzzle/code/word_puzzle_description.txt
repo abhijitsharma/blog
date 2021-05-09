@@ -1,0 +1,93 @@
+Each word has two + two blanks.
+You need to fill up the blank with the same pair of letters to form a word.
+
+For example:
+S _ _ ur _ _ e.
+
+The missing pair letters are A T.
+The word is Saturate.
+
+Have fun, DM me if you want any of the answers, those who finish can post
+
+1. _ _ i _ _
+2. V_ _ lat_ _ n
+3. H_ _ dw _ _ e
+4. _ _ rses _ _e
+5. P_ _ sev _ _ e
+6. S _ _tim _ _ t
+7. _ _da _ _ ted
+8. C _ _kb _ _ k
+9. Lo _ _i _ _
+10. D_ _ tingu_ _ h
+11. P_ _ dl _ _
+12. S _ _ur _ _ e
+13. _ _ p _ _ zard
+14. Who _ _ sa _ _
+15. _ _ at _ _
+16._ _ od_ _ rk.
+17. _ _ ma _ _
+18. _ _ y _ _ rd
+19. H _ _ rtbr _ _ k
+20. B _ _ evol _ _ t
+21. C _ _ diti _ _
+22. An _ _ cipa _ _ on
+23. _ _ rri _ _ lum
+24. E _ _ agi _ _
+25. Inc _ _ p _ _ ate
+26. Tr _ _ bad_ _r
+27. A_ _ a_ _ a
+28. _ _ s_ _ de
+29. A_ _ mo _ _
+30. Ba_ _ pa_ _
+
+1 input word "_i_" gram "ch" word "chich"
+2 input word "_i_" gram "on" word "onion"
+3 input word "_i_" gram "se" word "seise"
+4 input word "_i_" gram "sh" word "shish"
+5 input word "v_lat_n" gram "io" word "violation"
+6 input word "h_dw_e" gram "ar" word "hardware"
+7 input word "_rses_e" gram "ho" word "horseshoe"
+8 input word "p_sev_e" gram "er" word "persevere"
+9 input word "s_tim_t" gram "en" word "sentiment"
+10 input word "_da_ted" gram "un" word "undaunted"
+11 input word "c_kb_k" gram "oo" word "cookbook"
+12 input word "lo_i_" gram "ng" word "longing"
+13 input word "d_tingu_h" gram "is" word "distinguish"
+14 input word "p_dl_" gram "ed" word "peddled"
+15 input word "s_ur_e" gram "at" word "saturate"
+16 input word "_p_zard" gram "ha" word "haphazard"
+17 input word "who_sa_" gram "le" word "wholesale"
+18 input word "_at_" gram "is" word "isatis"
+19 input word "_at_" gram "or" word "orator"
+20 input word "_od_rk" gram "wo" word "woodwork"
+21 input word "_ma_" gram "to" word "tomato"
+22 input word "_ma_" gram "ca" word "camaca"
+23 input word "_y_rd" gram "wa" word "wayward"
+24 input word "h_rtbr_k" gram "ea" word "heartbreak"
+25 input word "b_evol_t" gram "en" word "benevolent"
+26 input word "c_diti_" gram "on" word "condition"
+27 input word "an_cipa_on" gram "ti" word "anticipation"
+28 input word "_rri_lum" gram "cu" word "curriculum"
+29 input word "e_agi_" gram "ng" word "engaging"
+30 input word "inc_p_ate" gram "or" word "incorporate"
+31 input word "tr_bad_r" gram "ou" word "troubadour"
+32 input word "a_a_a" gram "lf" word "alfalfa"
+33 input word "_s_de" gram "ca" word "cascade"
+34 input word "a_mo_" gram "ne" word "anemone"
+35 input word "ba_pa_" gram "ck" word "backpack"
+
+__rpi__de : turpitude
+for__i__s : fortuitus
+__p__roni : pepperoni
+disse__io__ : dissensions
+
+_ _ rpi _ _ de
+for_ _ i _ _ s
+_ _ p _ _ roni
+disse _ _ io _ _
+
+ast toastmaster
+cou couscous
+
+to _ _ _ m _ _ _ er
+_ _ _ s _ _ _
