@@ -87,6 +87,7 @@ def print_stats(rd, print_mapping=False):
 def test():
     input_words = []
     with open('input_words.txt') as f:
+    # with open('input_words_10k_common.txt') as f:
         for line in f:
             parts = []
             for p in split('(_)', line.rstrip('\n')):
@@ -96,10 +97,11 @@ def test():
                 input_words.append(parts)
 
     with open('words_alpha.txt') as f:
+    # with open('words_10k_common.txt') as f:
         words = set([line.rstrip('\n') for line in f])
 
-    rd = initialize(words, repeated_ngram, 2, 2, False)
-    # rd = initialize(words, reverse_ngram, 2, 2, False)
+    rd = initialize(words, repeated_ngram, 2, 2, True)
+    # rd = initialize(words, reverse_ngram, 2, 2, True)
     solve(input_words, rd)
 
 
