@@ -53,6 +53,7 @@ def initialize(words, func_filter_ngrams, gram_len=2, num_reps=2, print_debug=Fa
 def solve(input_words, rd: defaultdict):
     i = 0
     for input_word in input_words:
+        found = False
         for key in rd.keys():
             gram_list = split(',', key)
             candidate = ""
@@ -69,6 +70,10 @@ def solve(input_words, rd: defaultdict):
                     i = i + 1
                     i_w = ''.join(input_word)
                     print(f'{i} input word "{i_w}" gram_list "{gram_list}" word "{candidate}"')
+                    found = True
+
+        if not found:
+            print(f'{i} input word NOT FOUND "{input_word}"')
 
 
 def print_stats(rd, print_mapping=False):
@@ -87,7 +92,7 @@ def print_stats(rd, print_mapping=False):
 def test():
     input_words = []
     with open('input_words.txt') as f:
-    # with open('input_words_10k_common.txt') as f:
+        # with open('input_words_10k_common.txt') as f:
         for line in f:
             parts = []
             for p in split('(_)', line.rstrip('\n')):
@@ -97,7 +102,7 @@ def test():
                 input_words.append(parts)
 
     with open('words_alpha.txt') as f:
-    # with open('words_10k_common.txt') as f:
+        # with open('words_10k_common.txt') as f:
         words = set([line.rstrip('\n') for line in f])
 
     rd = initialize(words, repeated_ngram, 2, 2, True)
