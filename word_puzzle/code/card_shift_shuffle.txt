@@ -1,0 +1,62 @@
+L L L
+L L L
+L M M
+M M M
+M M R
+R R R
+R R R
+
+
+
+Consider a deck of 21 cards. The configuration is 3 piles, 7 cards each. The victim chooses a card in one of the piles
+and just states the pile in which his/her card resides. The trick involves 3 rounds of "shift" and "shuffle" operations
+described below, post which the chosen card is found at the 11th position from the top.
+
+"shift"
+
+If the chosen pile is not the middle one, exchange it with the middle one; If it is already the middle one, no-op
+
+"shuffle"
+
+Pick up the piles from left to right and place them one below the other; Now populate the 3 piles by picking cards in
+order and placing them in order from the left to the right piles
+
+The position numbering is as follows:
+
+1 8  15
+2 9  16
+3 10 17
+4 11 18
+5 12 19
+6 13 20
+7 14 21
+
+Lets take an example to illustrate the working. Say chosen card is in position 1 - lets track the position of the chosen
+card after each "shift" and "shuffle" operation
+
+start   1	row, col = (1, 1)
+shift   8   row, col = (1, 2)
+shuffle 10  row, col = (3, 2)
+shift   10  row, col = (3, 2)
+shuffle 4   row, col = (4, 1)
+shift   11  row, col = (4, 2)
+shuffle 11  row, col = (4, 2)
+
+As you see it converges to pos 11 at row, col = (4, 2) - this is exactly the center of the grid above. I wrote a program
+that simulates the trick for different pile sizes and number of piles and all starting positions and in each case it
+converges to the exact mid of the grid (i.e. math.floor(pos / (num_piles * pile_sz)) + 1
+
+There is some intuition behind this as we are always moving the pile of interest to the middle, however
+mathematically speaking, can it be proven that it converges
+
+If one takes a (2n+1, 2m+1) matrix and chooses any element in  it and keeps performing transpose and col exchange
+with mid operations - we will end up with (the chosen element in  (n+1, m+1) position
+
+Col is not hard to see as the game is intentionally moving the candidate column to be middle one so that is fine..
+so independently reasoning can be done about row where the answer resides…after first round it could be either
+in 3, 4, or 5 th row if you lay down the cards and observe…so effectively you have (2 to 4) cards on top of potential answer
+..in the next round  7 prior cards occupy upto row 3 (partially) then you add (2-4) more cards and that forces you
+ to be in 4th row and exactly that row it does not throw you out of that row..post that shift operation if not
+ already brings the column to middle
+
+ [1, 2, 3, 4, 5] weights [7, 10, 20, 3, 40]
