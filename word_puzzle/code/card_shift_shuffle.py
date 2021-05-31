@@ -1,14 +1,17 @@
 import math
 
 
-def shift(pos, pile_sz):
-    if pos > pile_sz * 2:
-        new_pos = pos - pile_sz
+def shift(pos, pile_sz, num_piles):
+    mid = math.floor(num_piles / 2) + 1
+    q = math.floor(pos / pile_sz)
+    r = pos % pile_sz
+    if r == 0:
+        pile = q
     else:
-        if pos <= pile_sz:
-            new_pos = pos + pile_sz
-        else:
-            new_pos = pos
+        pile = q + 1
+    diff = mid - pile
+    new_pos = pos + (diff * pile_sz)
+    # print(f'pos {pos} pile {pile} mid {mid} diff {diff} new pos {new_pos}')
     print(f'shift   in.p {pos} out.p {new_pos}')
     return new_pos
 
@@ -34,6 +37,12 @@ def shuffled_row_col(pos, num_piles):
 
 def test():
     num_piles = 3
+    pile_sz = 3
+    num_rounds = 3
+    for p in range(1, (num_piles * pile_sz + 1)):
+        play_round(p, pile_sz, num_piles, num_rounds)
+
+    num_piles = 3
     pile_sz = 7
     num_rounds = 3
     for p in range(1, (num_piles * pile_sz + 1)):
@@ -45,23 +54,23 @@ def test():
     for p in range(1, (num_piles * pile_sz + 1)):
         play_round(p, pile_sz, num_piles, num_rounds)
 
-    # num_piles = 3
-    # pile_sz = 15
-    # num_rounds = 5
-    # for p in range(1, (num_piles * pile_sz + 1)):
-    #     play_round(p, pile_sz, num_piles, num_rounds)
+    num_piles = 3
+    pile_sz = 9
+    num_rounds = 5
+    for p in range(1, (num_piles * pile_sz + 1)):
+        play_round(p, pile_sz, num_piles, num_rounds)
 
-    # num_piles = 5
-    # pile_sz = 7
-    # num_rounds = 12
-    # for p in range(1, (num_piles * pile_sz + 1)):
-    #     play_round(p, pile_sz, num_piles, num_rounds)
+    num_piles = 5
+    pile_sz = 7
+    num_rounds = 3
+    for p in range(1, (num_piles * pile_sz + 1)):
+        play_round(p, pile_sz, num_piles, num_rounds)
 
 
 def play_round(p, pile_sz, num_piles, num_rounds):
     print(f'start.p      {p}')
     for i in range(1, num_rounds + 1):
-        p = shift(p, pile_sz)
+        p = shift(p, pile_sz, num_piles)
         p = shuffle(p, pile_sz, num_piles)
     print("-----------")
 
