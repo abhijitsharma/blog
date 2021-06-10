@@ -78,6 +78,12 @@ def test():
     for p in range(1, (num_piles * pile_sz + 1)):
         play_round(p, pile_sz, num_piles, num_rounds)
 
+    num_piles = 7
+    pile_sz = 3
+    num_rounds = 3
+    for p in range(1, (num_piles * pile_sz + 1)):
+        play_round(p, pile_sz, num_piles, num_rounds)
+
 
 if __name__ == '__main__':
     test()

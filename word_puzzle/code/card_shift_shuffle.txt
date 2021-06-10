@@ -49,8 +49,8 @@ converges to the exact mid of the grid (i.e. math.floor(pos / (num_piles * pile_
 There is some intuition behind this as we are always moving the pile of interest to the middle, however
 mathematically speaking, can it be proven that it converges
 
-If one takes a (2n+1, 2m+1) matrix and chooses any element in  it and keeps performing transpose and col exchange
-with mid operations - we will end up with (the chosen element in  (n+1, m+1) position
+If one takes a (2n+1, 2m+1) matrix and chooses any element in  it and performs 3 rounds of alternate col exchange with
+mid col and transpose operations - we will end up with (the chosen element in  (n+1, m+1) position
 
 Col is not hard to see as the game is intentionally moving the candidate column to be middle one so that is fine..
 so independently reasoning can be done about row where the answer resides…after first round it could be either
@@ -58,5 +58,95 @@ in 3, 4, or 5 th row if you lay down the cards and observe…so effectively you 
 ..in the next round  7 prior cards occupy upto row 3 (partially) then you add (2-4) more cards and that forces you
  to be in 4th row and exactly that row it does not throw you out of that row..post that shift operation if not
  already brings the column to middle
+
+Start
+Since shift op always brings chosen card to the middle col, assume sol is in M and only consider it's elements
+https://math.stackexchange.com/questions/2055398/mathematics-behind-this-card-trick
+
+L  M1  R
+L  M2  R
+L  M3  R
+L  M4  R
+L  M5  R
+L  M6  R
+L  M7  R
+
+After round 1 (solution is between row 3-5, middle col)
+
+L  L   L
+L  L   L
+L  M1  M2
+M3 M4  M5
+M6 M7  R
+R  R   R
+R  R   R
+
+After round 2 (row 4, middle col), and after swap with middle col - has to be in the dead center !
+
+L  L  L
+M3 M6 R
+R  L  L
+M1 M4 M7
+R  R  L
+L  M2 M5
+R  R  R
+
+L  M3 R
+M1 R  L
+R  L  M6
+L  M4 R
+M2 R  L
+R  L  M7
+L  M5 R
+
+L M1 R
+L M2 R
+L M3 R
+L M4 R
+L M5 R
+L M6 R
+L M7 R
+
+~
+
+L1  M1  R1
+L2  M2  R2
+L3  M3  R3
+L4  M4  R4
+L5  M5  R5
+L6  M6  R6
+L7  M7  R7
+
+L1  L2  L3
+L4  L5  L6
+L7  M1  M2
+M3  M4  M5
+M6  M7  R1
+R2  R3  R4
+R5  R6  R7
+
+L1  L4  L7
+M3  M6  R2
+R5  L2  L5
+M1  M4  M7
+R3  R6  L3
+L6  M2  M5
+R1  R4  R7
+
+L1  M3  R5
+M1  R3  L6
+R1  L4  M6
+L2  M4  R6
+M2  R4  L7
+R2  L5  M7
+L3  M5  R7
+
+L1  M1  R1
+L2  M2  R2
+L3  M3  R3
+L4  M4  R4
+L5  M5  R5
+L6  M6  R6
+L7  M7  R7
 
  [1, 2, 3, 4, 5] weights [7, 10, 20, 3, 40]
