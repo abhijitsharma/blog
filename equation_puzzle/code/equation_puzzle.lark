@@ -1,0 +1,28 @@
+?start: sum
+//    | NAME "=" sum    -> assign_var
+
+?sum: product
+    | sum "+" product   -> add
+    | sum "-" product   -> sub
+
+?product: unary
+    | product "*" unary  -> mul
+    | product "/" unary  -> div
+
+?unary: "√" expression -> sqrt
+    | "!"  expression -> fact
+    | "@"  expression -> noop
+    | "∛"  expression -> cuberoot
+    | expression
+
+?expression: "(" sum ")"
+    | atom
+
+?atom: NUMBER                 -> number
+    | NAME                    -> var
+
+
+%import common.CNAME -> NAME
+%import common.NUMBER
+%import common.WS_INLINE
+%ignore WS_INLINE
