@@ -2,6 +2,9 @@ from lark import Lark, Tree
 from itertools import product
 from math import sqrt, factorial
 
+bin_ops = ['+', '-', '*', '/']
+unary_ops = ['√', '!', '@', '∛']
+
 
 def load_grammar():
     with open("equation_puzzle.lark", "r") as f:
@@ -118,26 +121,53 @@ prop_logic_parser = Lark(grammar, parser='lalr')
 to_logic_tree = prop_logic_parser.parse
 
 
-def test_permutation(numbers, exp_result):
+def test_permutation_single_unary_op(numbers, exp_result):
     # h-0 (h-1(h-2 v-0 s-0 h-3 v-1) s-1 h-4 v-2)
     # √(√(√2 + √2) + √2)
     s_expr_fmt_l_tree = '{}({}({}{} {} {}{}) {} {}{})'
 
-    # h-0 (h-1 v-0 s-0 h-2 (h-3 v-1 s-1 h-4 v-2))
+    # h-0 (h-1 v-0 s-0 h-2 (h-3 v-1 s-1 h-4 v-2)
     # √(√2 + √(√2 + √2))
     s_expr_fmt_r_tree = '{}({}{} {} {}({}{} {} {}{}))'
-    bin_ops = ['+', '-', '*', '/']
     binary_p = list(product(bin_ops, repeat=2))
-    unary_ops = ['√', '!', '@', '∛']
     unary_p = list(product(unary_ops, repeat=5))
     n = 0
     for u in unary_p:
         for b in binary_p:
-            s = s_expr_fmt_r_tree.format(u[0], u[1], numbers[0], b[0], u[2], u[3], numbers[1], b[1], u[4], numbers[2])
-            check_expr(s, exp_result)
             s = s_expr_fmt_l_tree.format(u[0], u[1], u[2], numbers[0], b[0], u[3], numbers[1], b[1], u[4], numbers[2])
             check_expr(s, exp_result)
+            s = s_expr_fmt_r_tree.format(u[0], u[1], numbers[0], b[0], u[2], u[3], numbers[1], b[1], u[4], numbers[2])
+            check_expr(s, exp_result)
             n = n + 1
+    print(f'# of permutations {n * 2}')
+
+
+def test_permutation_double_unary_op(numbers, exp_result):
+
+    # h-0 (h-1 (h-2 (h-3 (h-4 (h-5 v-0) s-0 h-6 (h-7 v-1)) s-1 h-8 (h-9 v-2))))
+    # √(√(√(√(√(√2) + √(√2))) + √(√2)))
+    s_expr_fmt_l_tree = '{}({}({}({}({}({}{}) {} {}({}{}))) {} {}({}{})))'
+
+    # h-0 ( h-1 (h-2 (h-3 v-0) s-0 h-4 ( h-5 ( h-6 (h-7 v-1) s-1 h-8 (h-9 v-2)))))
+    # √(√(√(√2) + √(√(√(√2) + √(√2)))))
+    s_expr_fmt_r_tree = '{}({}({}({}{}) {} {}({}({}({}{}) {} {}({}{})))))'
+    binary_p = list(product(bin_ops, repeat=2))
+    unary_p = list(product(unary_ops, repeat=10))
+    print(f'size {len(unary_p)} {len(binary_p)}')
+    n = 0
+    for u in unary_p:
+        for b in binary_p:
+            # h-0 (h-1 (h-2 (h-3 (h-4 (h-5 v-0) s-0 h-6 (h-7 v-1)) s-1 h-8 (h-9 v-2))))
+            s = s_expr_fmt_l_tree.format(
+                u[0], u[1], u[2], u[3], u[4], u[5], numbers[0], b[0], u[6], u[7], numbers[1], b[1], u[8], u[9], numbers[2])
+            check_expr(s, exp_result)
+            # h-0 ( h-1 (h-2 (h-3 v-0) s-0 h-4 ( h-5 ( h-6 (h-7 v-1) s-1 h-8 (h-9 v-2)))))
+            s = s_expr_fmt_r_tree.format(
+                u[0], u[1], u[2], u[3], numbers[0], b[0], u[4], u[5], u[6], u[7], numbers[1], b[1], u[8], u[9], numbers[2])
+            check_expr(s, exp_result)
+            n = n + 1
+            if n % 100000 == 0:
+                print(f'# of permutations {n}')
     print(f'# of permutations {n * 2}')
 
 
@@ -151,14 +181,6 @@ def check_expr(s, exp_result):
             print(f'{s_s} = {result}')
     except:
         pass
-
-
-def print_list(p):
-    n = 0
-    for j in list(p):
-        print(j)
-        n = n + 1
-    print(f'# of permutations {n}')
 
 
 def parse(s):
@@ -181,12 +203,16 @@ def test_parse():
 
 if __name__ == '__main__':
     # test_parse()
-    test_permutation([1, 1, 1], 6)
-    test_permutation([2, 2, 2], 6)
-    test_permutation([3, 3, 3], 6)
-    test_permutation([4, 4, 4], 6)
-    test_permutation([5, 5, 5], 6)
-    test_permutation([6, 6, 6], 6)
-    test_permutation([7, 7, 7], 6)
-    test_permutation([8, 8, 8], 6)
-    test_permutation([9, 9, 9], 6)
+    # test_permutation_double_unary_op([8, 8, 8], 6)
+
+    # test_permutation_double_unary_op([9, 9, 9], 72)
+
+    test_permutation_single_unary_op([1, 1, 1], 6)
+    test_permutation_single_unary_op([2, 2, 2], 6)
+    test_permutation_single_unary_op([3, 3, 3], 6)
+    test_permutation_single_unary_op([4, 4, 4], 6)
+    test_permutation_single_unary_op([5, 5, 5], 6)
+    test_permutation_single_unary_op([6, 6, 6], 6)
+    test_permutation_single_unary_op([7, 7, 7], 6)
+    test_permutation_single_unary_op([8, 8, 8], 6)
+    test_permutation_single_unary_op([9, 9, 9], 6)
