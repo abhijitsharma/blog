@@ -81,7 +81,7 @@ def print_stats(rd, print_mapping=False):
     max_words = 0
     for gram in rd.keys():
         if print_mapping:
-            print(f'{gram} words {len(rd[gram])} : {rd[gram][0:200]}')
+            print(f'{gram} words {len(rd[gram])} : {rd[gram][0:300]}')
         num_words = num_words + len(rd[gram])
         if len(rd[gram]) > max_words:
             max_words = len(rd[gram])
